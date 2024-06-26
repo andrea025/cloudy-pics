@@ -42,7 +42,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
-	"wasa-photo.uniroma1.it/wasa-photo/service/database"
+	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
 )
 
 // Config is used to provide dependencies and configuration to the New function.
@@ -51,7 +51,7 @@ type Config struct {
 	Logger logrus.FieldLogger
 
 	// Database is the instance of database.AppDatabase where data are saved
-	Database database.AppDatabase
+	Database database_nosql.AppDatabase
 }
 
 // Router is the package API interface representing an API handler builder
@@ -93,5 +93,5 @@ type _router struct {
 	// Use context logger if available (e.g., in requests) instead of this logger.
 	baseLogger logrus.FieldLogger
 
-	db database.AppDatabase
+	db database_nosql.AppDatabase
 }

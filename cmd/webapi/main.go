@@ -25,7 +25,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -36,10 +35,12 @@ import (
 	"time"
 
 	"github.com/ardanlabs/conf"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/sirupsen/logrus"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api"
-	"wasa-photo.uniroma1.it/wasa-photo/service/database"
+	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+    "github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 // main is the program entry point. The only purpose of this function is to call run() and set the exit code if there is
@@ -83,16 +84,31 @@ func run() error {
 
 	// Start Database
 	logger.Println("initializing database support")
-	dbconn, err := sql.Open("sqlite3", cfg.DB.Filename)
+	// dbconn, err := sql.Open("sqlite3", cfg.DB.Filename)
+	// Specify your custom credentials
+    awsAccessKeyID := "ASIAWRRLGCS54ELHSNVC"
+    awsSecretAccessKey := "SCHiXRWAKRh2EcSP3xBRfdw7KTHM3z4EMSluxlxX"
+    awsRegion := "us-est-1"
+
+    // Create a custom AWS configuration with the provided credentials
+    conf, err := config.LoadDefaultConfig(context.TODO(),
+        config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(awsAccessKeyID, awsSecretAccessKey, "")),
+        config.WithRegion(awsRegion),
+    )
 	if err != nil {
-		logger.WithError(err).Error("error opening SQLite DB")
-		return fmt.Errorf("opening SQLite: %w", err)
+		logger.WithError(err).Error("error in creating an AWS session for dynamodb")
+		return fmt.Errorf("connecting to AWS for dynamodb: %w", err)
 	}
+	/*
 	defer func() {
 		logger.Debug("database stopping")
-		_ = dbconn.Close()
+		_ = sess.Close()
 	}()
-	db, err := database.New(dbconn)
+	*/
+	svc := dynamodb.NewFromConfig(conf)
+	
+	// db, err := database.New(dbconn)
+	db, err := database_nosql.New(svc)
 	if err != nil {
 		logger.WithError(err).Error("error creating AppDatabase")
 		return fmt.Errorf("creating AppDatabase: %w", err)

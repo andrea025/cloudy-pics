@@ -45,15 +45,6 @@ var ErrCommentDoesNotExist = errors.New("comment does not exist")
 var ErrForbidden = errors.New("operation not allowed")
 var ErrUsernameAlreadyTaken = errors.New("username already taken")
 
-// Fountain struct represent a fountain in every API call between this package and the outside world.
-// Note that the internal representation of fountain in the database might be different.
-type Fountain struct {
-	ID        uint64
-	Latitude  float64
-	Longitude float64
-	Status    string
-}
-
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
 	DoLogin(username string) (string, error)
