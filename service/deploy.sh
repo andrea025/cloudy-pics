@@ -9,25 +9,25 @@ cd "$(dirname "$0")" || exit
 # Archive the project
 (
   cd ../..
-  #tar czf backend.tar wasa-photo/{service/api,service/database_nosql,cmd/webapi,Dockerfile.backend,go.mod,go.sum,service/database}
-  #tar czf frontend.tar wasa-photo/{webui/public,webui/src,webui/index.html,webui/package-lock.json,webui/package.json,webui/static-resources.go,webui/vite.config.js,Dockerfile.frontend}
-  tar czf wasa-photo.tar wasa-photo
+  #tar czf backend.tar cloudy-pics/{service/api,service/database_nosql,cmd/webapi,Dockerfile.backend,go.mod,go.sum,service/database}
+  #tar czf frontend.tar cloudy-pics/{webui/public,webui/src,webui/index.html,webui/package-lock.json,webui/package.json,webui/static-resources.go,webui/vite.config.js,Dockerfile.frontend}
+  tar czf cloudy-pics.tar cloudy-pics
   #ls -lh backend.tar
   #ls -lh frontend.tar
-  ls -lh wasa-photo.tar
+  ls -lh cloudy-pics.tar
   #scp -o ConnectTimeout=3 backend.tar learnerlab:.
   #scp -o ConnectTimeout=3 frontend.tar learnerlab:.
-  scp -o ConnectTimeout=3 wasa-photo.tar learnerlab:.
+  scp -o ConnectTimeout=3 cloudy-pics.tar learnerlab:.
   #rm backend.tar
   #rm frontend.tar
-  rm wasa-photo.tar
+  rm cloudy-pics.tar
 )
 
 # Build Docker image
-# ssh learnerlab "rm -rf wasa-photo && tar xzf backend.tar && tar xzf frontend.tar && rm backend.tar && rm frontend.tar"
-ssh learnerlab "rm -rf wasa-photo && tar xzf wasa-photo.tar && rm wasa-photo.tar"
-ssh learnerlab "cd wasa-photo && sudo docker build -f Dockerfile.backend -t backend:latest ."
-ssh learnerlab "cd wasa-photo && sudo docker build -f Dockerfile.frontend -t frontend:latest ."
+# ssh learnerlab "rm -rf cloudy-pics && tar xzf backend.tar && tar xzf frontend.tar && rm backend.tar && rm frontend.tar"
+ssh learnerlab "rm -rf cloudy-pics && tar xzf cloudy-pics.tar && rm cloudy-pics.tar"
+ssh learnerlab "cd cloudy-pics && sudo docker build -f Dockerfile.backend -t backend:latest ."
+ssh learnerlab "cd cloudy-pics && sudo docker build -f Dockerfile.frontend -t frontend:latest ."
 
 # Stop remote container if running
 ssh learnerlab "sudo docker ps -q -a --filter name=backend | xargs sudo docker rm -f" || true
