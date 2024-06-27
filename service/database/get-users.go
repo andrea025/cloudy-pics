@@ -3,7 +3,7 @@ package database
 func (db *appdbimpl) GetUsers(req_id string) ([]UserShortInfo, error) {
 	users := []UserShortInfo{}
 
-	sqlStmt := `SELECT * FROM User LIMIT 50;`
+	sqlStmt := `SELECT * FROM User LIMIT 100;`
 	rows, err := db.c.Query(sqlStmt)
 	if err != nil {
 		return []UserShortInfo{}, err

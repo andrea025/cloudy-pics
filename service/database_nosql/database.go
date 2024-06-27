@@ -11,6 +11,8 @@ import (
 )
 
 var ErrUserDoesNotExist = errors.New("user does not exist")
+var ErrCannotUnfollow = errors.New("user not found in following list")
+var ErrCannotUnban = errors.New("user not found in banned list")
 var ErrBanned = errors.New("user banned")
 var ErrPhotoDoesNotExist = errors.New("photo does not exist")
 var ErrDeletePhotoForbidden = errors.New("user cannot delete other users' photos")
@@ -22,15 +24,21 @@ var ErrUsernameAlreadyTaken = errors.New("username already taken")
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
     DoLogin(username string) (string, error)
-    /*
-    GetUserProfile(id string, req_id string) (User, error)
-    CheckBan(user_id string, target_user_id string) (bool, error) // don't know if leave it here or not
+    CheckBan(user_id string, target_user_id string) (bool, error)
     CheckUser(user_id string) (bool, error)
     CheckPhoto(photo_id string) (bool, error)
     FollowUser(user_id string, target_user_id string) error
-    BanUser(user_id string, target_user_id string) error
     UnfollowUser(user_id string, target_user_id string) error
+    BanUser(user_id string, target_user_id string) error
     UnbanUser(user_id string, target_user_id string) error
+    GetFollowing(id string, req_id string) ([]UserShortInfo, error)
+    GetBanned(id string, req_id string) ([]UserShortInfo, error)
+    GetFollowers(id string, req_id string) ([]UserShortInfo, error)
+    SetMyUsername(id string, username string) error
+    SearchUser(username string, req_id string) (UserShortInfo, error)
+    GetUsers(req_id string) ([]UserShortInfo, error)
+    /*
+    GetUserProfile(id string, req_id string) (User, error)
     UploadPhoto(id string, created_at string, url string, owner string) (Photo, error)
     DeletePhoto(photo_id string, req_id string) (string, error)
     LikePhoto(photo_id string, user_id string) error
@@ -38,13 +46,7 @@ type AppDatabase interface {
     CommentPhoto(cid string, pid string, uid string, text string, created_datetime string) (Comment, error)
     UncommentPhoto(photo_id string, comment_id string, req_id string) error
     GetMyStream(id string) ([]Photo, error)
-    GetUsers(req_id string) ([]UserShortInfo, error)
-    SearchUser(username string, req_id string) (UserShortInfo, error)
     GetPhoto(id string, req_id string) (Photo, error)
-    SetMyUsername(id string, username string) error
-    GetFollowers(id string, req_id string) ([]UserShortInfo, error)
-    GetFollowing(id string, req_id string) ([]UserShortInfo, error)
-    GetBanned(id string, req_id string) ([]UserShortInfo, error)
     */
 
     // Ping checks whether the database is available or not (in that case, an error will be returned)
@@ -54,6 +56,19 @@ type AppDatabase interface {
 type appdbimpl struct {
     c *dynamodb.Client
 }
+
+/*
+// getItem returns an item if found based on the key provided.
+// the key could be either a primary or composite key and values map.
+func GetItem(c *dynamodb.Client, tableName string, key DynoNotation) (item DynoNotation, err error) {
+    resp, err := c.GetItem(context.TODO(), &dynamodb.GetItemInput{Key: key, TableName: aws.String(tableName)})
+    if err != nil {
+        return nil, err
+    }
+
+    return resp.Item, nil
+}
+*/
 
 func New(db *dynamodb.Client) (AppDatabase, error) {
 	if db == nil {
