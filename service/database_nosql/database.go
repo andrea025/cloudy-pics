@@ -45,10 +45,8 @@ type AppDatabase interface {
     LikePhoto(photo_id string, user_id string) error
     UnlikePhoto(photo_id string, user_id string) error
     GetMyStream(id string) ([]Photo, error)
-    /*
-    GetUserProfile(id string, req_id string) (User, error)
     GetPhoto(id string, req_id string) (Photo, error)
-    */
+    GetUserProfile(id string, req_id string) (User, error)
 
     // Ping checks whether the database is available or not (in that case, an error will be returned)
     Ping() error
