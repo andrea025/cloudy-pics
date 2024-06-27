@@ -37,10 +37,10 @@ type AppDatabase interface {
     SetMyUsername(id string, username string) error
     SearchUser(username string, req_id string) (UserShortInfo, error)
     GetUsers(req_id string) ([]UserShortInfo, error)
-    /*
-    GetUserProfile(id string, req_id string) (User, error)
     UploadPhoto(id string, created_at string, url string, owner string) (Photo, error)
     DeletePhoto(photo_id string, req_id string) (string, error)
+    /*
+    GetUserProfile(id string, req_id string) (User, error)
     LikePhoto(photo_id string, user_id string) error
     UnlikePhoto(photo_id string, user_id string) error
     CommentPhoto(cid string, pid string, uid string, text string, created_datetime string) (Comment, error)
