@@ -13,6 +13,7 @@ import (
 var ErrUserDoesNotExist = errors.New("user does not exist")
 var ErrCannotUnfollow = errors.New("user not found in following list")
 var ErrCannotUnban = errors.New("user not found in banned list")
+var ErrCannotUnlike = errors.New("user not found in photo likes list")
 var ErrBanned = errors.New("user banned")
 var ErrPhotoDoesNotExist = errors.New("photo does not exist")
 var ErrDeletePhotoForbidden = errors.New("user cannot delete other users' photos")
@@ -38,14 +39,14 @@ type AppDatabase interface {
     SearchUser(username string, req_id string) (UserShortInfo, error)
     GetUsers(req_id string) ([]UserShortInfo, error)
     UploadPhoto(id string, created_at string, url string, owner string) (Photo, error)
-    DeletePhoto(photo_id string, req_id string) (string, error)
-    /*
-    GetUserProfile(id string, req_id string) (User, error)
-    LikePhoto(photo_id string, user_id string) error
-    UnlikePhoto(photo_id string, user_id string) error
     CommentPhoto(cid string, pid string, uid string, text string, created_datetime string) (Comment, error)
     UncommentPhoto(photo_id string, comment_id string, req_id string) error
+    DeletePhoto(photo_id string, req_id string) (string, error)
+    LikePhoto(photo_id string, user_id string) error
+    UnlikePhoto(photo_id string, user_id string) error
     GetMyStream(id string) ([]Photo, error)
+    /*
+    GetUserProfile(id string, req_id string) (User, error)
     GetPhoto(id string, req_id string) (Photo, error)
     */
 
