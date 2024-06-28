@@ -8,7 +8,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
-	"wasa-photo.uniroma1.it/wasa-photo/service/database"
+	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
 )
 
 type User struct {
@@ -20,7 +20,7 @@ type User struct {
 	Photos         []Photo `json:"photos"`
 }
 
-func (u *User) FromDatabase(user database.User) {
+func (u *User) FromDatabase(user database_nosql.User) {
 	u.Id = user.Id
 	u.Username = user.Username
 	u.Followers = user.Followers
@@ -39,10 +39,10 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 
 	var user User
 	dbuser, err := rt.db.GetUserProfile(user_id, strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
-	if errors.Is(err, database.ErrUserDoesNotExist) {
+	if errors.Is(err, database_nosql.ErrUserDoesNotExist) {
 		w.WriteHeader(http.StatusNotFound)
 		return
-	} else if errors.Is(err, database.ErrBanned) {
+	} else if errors.Is(err, database_nosql.ErrBanned) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	} else if err != nil {

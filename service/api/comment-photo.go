@@ -11,7 +11,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
-	"wasa-photo.uniroma1.it/wasa-photo/service/database"
+	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
 )
 
 type Comment struct {
@@ -22,7 +22,7 @@ type Comment struct {
 	CreatedDatetime string        `json:"created_datetime"`
 }
 
-func (c *Comment) FromDatabase(comment database.Comment) {
+func (c *Comment) FromDatabase(comment database_nosql.Comment) {
 	c.Id = comment.Id
 	c.Photo = comment.Photo
 	c.User.FromDatabase(comment.User)
@@ -59,10 +59,10 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 	// comment = Comment{Id: cid, Photo: pid, User: uid, Text: ct.Text, CreatedDatetime: creation_datetime}
 
 	dbComment, er := rt.db.CommentPhoto(cid, pid, uid, ct.Text, created_datetime)
-	if errors.Is(er, database.ErrBanned) {
+	if errors.Is(er, database_nosql.ErrBanned) {
 		w.WriteHeader(http.StatusForbidden)
 		return
-	} else if errors.Is(er, database.ErrPhotoDoesNotExist) {
+	} else if errors.Is(er, database_nosql.ErrPhotoDoesNotExist) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	} else if er != nil {

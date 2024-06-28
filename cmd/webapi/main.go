@@ -86,8 +86,8 @@ func run() error {
 	logger.Println("initializing database support")
 	// dbconn, err := sql.Open("sqlite3", cfg.DB.Filename)
 	// Specify your custom credentials
-    awsAccessKeyID := "ASIAWRRLGCS54ELHSNVC"
-    awsSecretAccessKey := "SCHiXRWAKRh2EcSP3xBRfdw7KTHM3z4EMSluxlxX"
+    awsAccessKeyID := "ASIAWRRLGCS5UCQCBHQH"
+    awsSecretAccessKey := "8sRoVYmpEojnt/f7NYO6BFauWx6T9fmp6hqm9dzN"
     awsRegion := "us-est-1"
 
     // Create a custom AWS configuration with the provided credentials

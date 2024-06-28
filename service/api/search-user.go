@@ -8,7 +8,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
-	"wasa-photo.uniroma1.it/wasa-photo/service/database"
+	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
 )
 
 type UsersInfoListResponse struct {

@@ -14,7 +14,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
-	"wasa-photo.uniroma1.it/wasa-photo/service/database"
+	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
 )
 
 var storageBasePath string = "./storage/"
@@ -28,7 +28,7 @@ type Photo struct {
 	Comments        CommentsCollection `json:"comments"`
 }
 
-func (p *Photo) FromDatabase(photo database.Photo) {
+func (p *Photo) FromDatabase(photo database_nosql.Photo) {
 	p.Id = photo.Id
 	p.CreatedDatetime = photo.CreatedDatetime
 	p.PhotoUrl = photo.PhotoUrl
@@ -42,7 +42,7 @@ type UserShortInfo struct {
 	Username string `json:"username"`
 }
 
-func (usi *UserShortInfo) FromDatabase(userShortInfo database.UserShortInfo) {
+func (usi *UserShortInfo) FromDatabase(userShortInfo database_nosql.UserShortInfo) {
 	usi.Id = userShortInfo.Id
 	usi.Username = userShortInfo.Username
 }
@@ -52,7 +52,7 @@ type LikesCollection struct {
 	Users []UserShortInfo `json:"users"`
 }
 
-func (lc *LikesCollection) FromDatabase(lcdb database.LikesCollection) {
+func (lc *LikesCollection) FromDatabase(lcdb database_nosql.LikesCollection) {
 	lc.Count = lcdb.Count
 	lc.Users = []UserShortInfo{}
 	for _, usi := range lcdb.Users {
@@ -67,7 +67,7 @@ type CommentsCollection struct {
 	Comments []Comment `json:"comments"`
 }
 
-func (cc *CommentsCollection) FromDatabase(ccdb database.CommentsCollection) {
+func (cc *CommentsCollection) FromDatabase(ccdb database_nosql.CommentsCollection) {
 	cc.Count = ccdb.Count
 	cc.Comments = []Comment{}
 	for _, c := range ccdb.Comments {
