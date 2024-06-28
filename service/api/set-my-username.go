@@ -23,7 +23,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	}
 
 	err = rt.db.SetMyUsername(ps.ByName("user_id"), username.Name)
-	if errors.Is(err, database.ErrUsernameAlreadyTaken) {
+	if errors.Is(err, database_nosql.ErrUsernameAlreadyTaken) {
 		w.WriteHeader(http.StatusConflict)
 		return
 	} else if err != nil {

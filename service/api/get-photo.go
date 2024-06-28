@@ -16,10 +16,10 @@ func (rt *_router) getPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 
 	var photo Photo
 	dbphoto, err := rt.db.GetPhoto(user_id, strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
-	if errors.Is(err, database.ErrPhotoDoesNotExist) {
+	if errors.Is(err, database_nosql.ErrPhotoDoesNotExist) {
 		w.WriteHeader(http.StatusNotFound)
 		return
-	} else if errors.Is(err, database.ErrBanned) {
+	} else if errors.Is(err, database_nosql.ErrBanned) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	} else if err != nil {

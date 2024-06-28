@@ -14,10 +14,10 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 	pid, cid, req_id := ps.ByName("photo_id"), ps.ByName("comment_id"), strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
 
 	err := rt.db.UncommentPhoto(pid, cid, req_id)
-	if errors.Is(err, database.ErrPhotoDoesNotExist) || errors.Is(err, database.ErrCommentDoesNotExist) {
+	if errors.Is(err, database_nosql.ErrPhotoDoesNotExist) || errors.Is(err, database_nosql.ErrCommentDoesNotExist) {
 		w.WriteHeader(http.StatusNotFound)
 		return
-	} else if errors.Is(err, database.ErrForbidden) {
+	} else if errors.Is(err, database_nosql.ErrForbidden) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	} else if err != nil {

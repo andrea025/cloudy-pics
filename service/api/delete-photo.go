@@ -16,10 +16,10 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	req_id := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
 
 	url, err := rt.db.DeletePhoto(pid, req_id)
-	if errors.Is(err, database.ErrPhotoDoesNotExist) {
+	if errors.Is(err, database_nosql.ErrPhotoDoesNotExist) {
 		w.WriteHeader(http.StatusNotFound)
 		return
-	} else if errors.Is(err, database.ErrDeletePhotoForbidden) {
+	} else if errors.Is(err, database_nosql.ErrDeletePhotoForbidden) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	} else if err != nil {

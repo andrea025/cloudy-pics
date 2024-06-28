@@ -15,10 +15,10 @@ func (rt *_router) getFollowing(w http.ResponseWriter, r *http.Request, ps httpr
 	ret := []UserShortInfo{}
 
 	dbfollowing, err := rt.db.GetFollowing(ps.ByName("user_id"), strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
-	if errors.Is(err, database.ErrUserDoesNotExist) {
+	if errors.Is(err, database_nosql.ErrUserDoesNotExist) {
 		w.WriteHeader(http.StatusNotFound)
 		return
-	} else if errors.Is(err, database.ErrBanned) {
+	} else if errors.Is(err, database_nosql.ErrBanned) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	} else if err != nil {

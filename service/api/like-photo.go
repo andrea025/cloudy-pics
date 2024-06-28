@@ -13,10 +13,10 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	pid, uid := ps.ByName("photo_id"), ps.ByName("user_id")
 
 	err := rt.db.LikePhoto(pid, uid)
-	if errors.Is(err, database.ErrPhotoDoesNotExist) {
+	if errors.Is(err, database_nosql.ErrPhotoDoesNotExist) {
 		w.WriteHeader(http.StatusNotFound)
 		return
-	} else if errors.Is(err, database.ErrBanned) || errors.Is(err, database.ErrNotSelfLike) {
+	} else if errors.Is(err, database_nosql.ErrBanned) || errors.Is(err, database_nosql.ErrNotSelfLike) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	} else if err != nil {

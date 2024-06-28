@@ -28,7 +28,7 @@ func (rt *_router) searchUser(w http.ResponseWriter, r *http.Request, ps httprou
 		}
 
 		dbuser, err := rt.db.SearchUser(username.Name, req_id)
-		if errors.Is(err, database.ErrUserDoesNotExist) {
+		if errors.Is(err, database_nosql.ErrUserDoesNotExist) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else if err != nil {

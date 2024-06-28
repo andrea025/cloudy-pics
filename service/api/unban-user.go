@@ -14,7 +14,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 
 	err := rt.db.UnbanUser(uid, tuid)
 
-	if errors.Is(err, database.ErrUserDoesNotExist) {
+	if errors.Is(err, database_nosql.ErrUserDoesNotExist) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	} else if err != nil {
