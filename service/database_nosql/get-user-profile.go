@@ -45,6 +45,14 @@ func (db *appdbimpl) GetUserProfile(id string, req_id string) (User, error) {
         return user, ErrBanned
     }
 
+    user.Id = id
+
+    usernameAttr, ok := result.Item["username"].(*types.AttributeValueMemberS)
+    if !ok {
+        return user, fmt.Errorf("username attribute is not a string")
+    }
+    user.Username = usernameAttr.Value
+
     followingListAttr, ok := result.Item["following"]
     if !ok {
         return user, nil
@@ -56,16 +64,18 @@ func (db *appdbimpl) GetUserProfile(id string, req_id string) (User, error) {
     }
     user.Following = len(followingList.Value)
 
-    var followers []UserShortInfo
-    followers, err = db.GetFollowers(id, req_id)
-    if err != nil {
-        return user, err
+    followers, erro := db.GetFollowers(id, req_id)
+    if erro != nil {
+        return user, erro
     }
     user.Followers = len(followers)
 
     scanInput := &dynamodb.ScanInput{
         TableName: aws.String("Photo"),
-        FilterExpression: aws.String("owner = :owner_id"),
+        FilterExpression: aws.String("#owner = :owner_id"),
+        ExpressionAttributeNames: map[string]string{
+            "#owner": "owner",
+        },
         ExpressionAttributeValues: map[string]types.AttributeValue{
             ":owner_id": &types.AttributeValueMemberS{Value: id},
         },

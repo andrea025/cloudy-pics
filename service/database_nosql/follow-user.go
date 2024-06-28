@@ -45,8 +45,8 @@ func (db *appdbimpl) FollowUser(user_id string, target_user_id string) error {
         UpdateExpression: aws.String("SET following = list_append(if_not_exists(following, :empty_list), :target_user_id)"),
         ConditionExpression: aws.String("NOT contains(following, :target_user_id)"),
         ExpressionAttributeValues: map[string]types.AttributeValue{
-            ":target_user_id": &types.AttributeValueMemberSS{Value: []string{target_user_id}},
-            ":empty_list":     &types.AttributeValueMemberSS{Value: []string{}},
+            ":target_user_id": &types.AttributeValueMemberL{Value: []types.AttributeValue{&types.AttributeValueMemberS{Value: target_user_id}}},
+            ":empty_list":     &types.AttributeValueMemberL{Value: []types.AttributeValue{}},
         },
         ReturnValues: types.ReturnValueUpdatedNew,
     }

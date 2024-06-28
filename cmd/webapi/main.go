@@ -86,13 +86,14 @@ func run() error {
 	logger.Println("initializing database support")
 	// dbconn, err := sql.Open("sqlite3", cfg.DB.Filename)
 	// Specify your custom credentials
-    awsAccessKeyID := "ASIAWRRLGCS5UCQCBHQH"
-    awsSecretAccessKey := "8sRoVYmpEojnt/f7NYO6BFauWx6T9fmp6hqm9dzN"
-    awsRegion := "us-est-1"
+    awsAccessKeyID := "ASIAWRRLGCS5VRMQC44M"
+    awsSecretAccessKey := "cQ6jIrJYESBz0awMPE5MBsaqrWAS2qktrZRwMGa6"
+    awsSessionToken := "IQoJb3JpZ2luX2VjEF4aCXVzLXdlc3QtMiJHMEUCIEIFYMkECDm3HwmqbHZVfRoNZKPBn4EfdM6Huk6ib7ShAiEAsqJLNGIAVSFqxvkW6h0zU33yxFfVy6d4qYr/uAkzYVkquwIIFxABGgw0NDk5ODg0MDAzMTUiDGFxWq7XsPFwBQBUjSqYAkLUx0HOx6wXEZT85Its/E1pQucMqZ7GRxhN7/KLDY0Fj+Uy47H5bhFTdM9oJllJEArsCDxRtsyy1tnvJF6pWBglcL3q1KaYIUZQRTYy9AaDPnecv3YxFYrF6vtQbM6bTn16EG5kVwPBEUjLKeknsDFExXksced7qBHz3c/enEecgK4vaD9/uNQqFiBUJP21efLcRb/YhpNX4rdxDtSWx3UZdKi671zx5MmDqxxXUVxr2fJQJYgDZTTuIxeY11qL9LdE01DReIwJ0F6B2KPdOtBamgSmVc0iyUsIO6R7L3709NzEIC9+jZ0muLI7HhhtVyBV8sfmyM/Bvmwq4FTIm+QFVEU1jGwjP5Z2WLwbMLJYCekWpl2qmGMw84H7swY6nQHhpb9IgGJ0fKAbD236ANHX4kAmonYtXQta/c8JAF+g2uar7sptyN27Thaq32Mk9/Rl2c8VRC8pqfZtZPdWAxFyK+b4vEIt0PjEFMkp+dIBL9l6MPQV28XMtyiTB+Nj9hJBrI78A8gmRM1e4MYlcm5LChZ8EZfm00XZdzKilYrHbr1skprN7dFPZqUQYj/dobWd4SrXJ9R0piyDOAtn"
+    awsRegion := "us-east-1"
 
     // Create a custom AWS configuration with the provided credentials
     conf, err := config.LoadDefaultConfig(context.TODO(),
-        config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(awsAccessKeyID, awsSecretAccessKey, "")),
+        config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(awsAccessKeyID, awsSecretAccessKey, awsSessionToken)),
         config.WithRegion(awsRegion),
     )
 	if err != nil {

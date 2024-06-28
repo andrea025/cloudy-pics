@@ -34,8 +34,8 @@ ssh learnerlab "sudo docker ps -q -a --filter name=backend | xargs sudo docker r
 ssh learnerlab "sudo docker ps -q -a --filter name=frontend | xargs sudo docker rm -f" || true
 
 # Start container in daemon mode
-ssh learnerlab "sudo docker run -d --name backend --restart unless-stopped -p 3000:3000 -p 4000:4000 backend:latest"
-ssh learnerlab "sudo docker run -d --name frontend --restart unless-stopped -p 80:80 frontend:latest"
+ssh learnerlab "sudo docker run -d --name frontend -p 80:80 frontend:latest"
+ssh learnerlab "sudo docker run --name backend -p 3000:3000 -p 4000:4000 backend:latest"
 
 # Test the connection
 VM_IP="$(grep learnerlab ~/.ssh/config -A10 | grep HostName | awk '{print $2}')"

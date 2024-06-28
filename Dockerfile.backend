@@ -9,7 +9,10 @@ RUN go build -o /app/webapi ./cmd/webapi
 
 
 ### Create final container
-FROM debian:bullseye
+FROM debian:bookworm-slim
+
+# Install CA certificates
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 ### Inform Docker about which port is used
 EXPOSE 3000 4000

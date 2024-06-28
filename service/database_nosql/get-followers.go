@@ -1,46 +1,35 @@
 package database_nosql
 
 import (
-	"context"
-	"fmt"
+    "context"
+    "fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+    "github.com/aws/aws-sdk-go-v2/aws"
+    "github.com/aws/aws-sdk-go-v2/service/dynamodb"
+    "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-
 func (db *appdbimpl) GetFollowers(id string, req_id string) ([]UserShortInfo, error) {
-	users := []UserShortInfo{}
+    users := []UserShortInfo{}
 
-	exists, err := db.CheckUser(id)
-	if err != nil {
-		return nil, err
-	} else if !exists {
-		return nil, ErrUserDoesNotExist
-	}	
+    exists, err := db.CheckUser(id)
+    if err != nil {
+        return nil, err
+    } else if !exists {
+        return nil, ErrUserDoesNotExist
+    }   
 
-	// check if the requesting user has been banned
-	var banned bool
-	banned, err = db.CheckBan(id, req_id)
-	if err != nil {
-		return nil, err
-	} else if banned {
-		return nil, ErrBanned
-	}
+    // check if the requesting user has been banned
+    var banned bool
+    banned, err = db.CheckBan(id, req_id)
+    if err != nil {
+        return nil, err
+    } else if banned {
+        return nil, ErrBanned
+    }
 
-	queryInput := &dynamodb.QueryInput{
+    scanInput := &dynamodb.ScanInput{
         TableName: aws.String("User"),
-        /*
-        KeyConditions: map[string]types.Condition{
-            "id": {
-                ComparisonOperator: types.ComparisonOperatorEq,
-                AttributeValueList: []types.AttributeValue{
-                    &types.AttributeValueMemberS{Value: user_id},
-                },
-            },
-        },
-        */
         FilterExpression: aws.String("contains(following, :id)"),
         ExpressionAttributeValues: map[string]types.AttributeValue{
             ":id": &types.AttributeValueMemberS{Value: id},
@@ -48,12 +37,12 @@ func (db *appdbimpl) GetFollowers(id string, req_id string) ([]UserShortInfo, er
         ProjectionExpression: aws.String("id, username"),
     }
 
-    result, err := db.c.Query(context.TODO(), queryInput)
+    result, err := db.c.Scan(context.TODO(), scanInput)
     if err != nil {
-        return nil, fmt.Errorf("failed to query user: %w", err)
+        return nil, fmt.Errorf("failed to scan user table: %w", err)
     }
     if result == nil {
-    	return nil, nil
+        return nil, fmt.Errorf("the result of GetFollowers is nil: %w", err)
     }
 
     for _, item := range result.Items {

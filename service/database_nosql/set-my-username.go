@@ -38,7 +38,7 @@ func (db *appdbimpl) SetMyUsername(id string, username string) error {
 		return ErrUserDoesNotExist
 	}
 
-	// Update username list
+	// Update username
     updateInput := &dynamodb.UpdateItemInput{
         TableName: aws.String("User"),
         Key: map[string]types.AttributeValue{
@@ -46,7 +46,7 @@ func (db *appdbimpl) SetMyUsername(id string, username string) error {
         },
         UpdateExpression: aws.String("SET username = :username"),
         ExpressionAttributeValues: map[string]types.AttributeValue{
-            ":username": &types.AttributeValueMemberSS{Value: []string{username}},
+            ":username": &types.AttributeValueMemberS{Value: username},
         },
         ReturnValues: types.ReturnValueUpdatedNew,
     }

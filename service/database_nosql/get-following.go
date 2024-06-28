@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 )
 
 type UserShortInfo struct {
@@ -55,6 +54,10 @@ func (db *appdbimpl) GetFollowing(id string, req_id string) ([]UserShortInfo, er
 		return nil, fmt.Errorf("following attribute is not a list")
 	}
 
+	if len(followingList.Value) == 0 {
+		return nil, nil // No followed users
+	}
+
 	keys := []map[string]types.AttributeValue{}
 	for _, item := range followingList.Value {
 		if idAttr, ok := item.(*types.AttributeValueMemberS); ok {
@@ -62,6 +65,10 @@ func (db *appdbimpl) GetFollowing(id string, req_id string) ([]UserShortInfo, er
 				"id": &types.AttributeValueMemberS{Value: idAttr.Value},
 			})
 		}
+	}
+
+	if len(keys) == 0 {
+		return nil, nil // No keys to query
 	}
 
 	batchGetInput := &dynamodb.BatchGetItemInput{
@@ -77,14 +84,16 @@ func (db *appdbimpl) GetFollowing(id string, req_id string) ([]UserShortInfo, er
 		return nil, fmt.Errorf("failed to batch get users: %w", err)
 	}
 
+	/*
 	items := []map[string]types.AttributeValue{}
 	err = attributevalue.UnmarshalListOfMaps(batchGetResult.Responses["User"], &items)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal users: %w", err)
 	}
+	*/
 
 	// Print the items
-	for _, item := range items {
+	for _, item := range batchGetResult.Responses["User"] {
 		var user UserShortInfo
 		if idAttr, ok := item["id"].(*types.AttributeValueMemberS); ok {
 			user.Id = idAttr.Value

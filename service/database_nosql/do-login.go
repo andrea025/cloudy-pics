@@ -12,21 +12,21 @@ import (
 
 // Function to log in a user
 func (db *appdbimpl) DoLogin(username string) (string, error) {
-    // Query the User table for the username
-    input := &dynamodb.GetItemInput{
+    input := &dynamodb.ScanInput{
         TableName: aws.String("User"),
-        Key: map[string]types.AttributeValue{
-            "username": &types.AttributeValueMemberS{Value: username},
+        FilterExpression: aws.String("username = :username"),
+        ExpressionAttributeValues: map[string]types.AttributeValue{
+            ":username": &types.AttributeValueMemberS{Value: username},
         },
     }
 
-    result, err := db.c.GetItem(context.TODO(), input)
+    result, err := db.c.Scan(context.TODO(), input)
     if err != nil {
         return "", err
     }
 
     var id string
-    if result.Item == nil {
+    if len(result.Items) == 0 {
         // If the user does not exist, generate a new user ID
         id = fmt.Sprintf("%x", md5.Sum([]byte(username)))
 
@@ -51,7 +51,7 @@ func (db *appdbimpl) DoLogin(username string) (string, error) {
         }
     } else {
         // If the user exists, extract the user ID
-        idAttr, ok := result.Item["id"].(*types.AttributeValueMemberS)
+        idAttr, ok := result.Items[0]["id"].(*types.AttributeValueMemberS)
         if !ok {
             return "", fmt.Errorf("id attribute is missing or not a string")
         }

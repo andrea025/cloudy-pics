@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 )
 
 func (db *appdbimpl) GetBanned(id string, req_id string) ([]UserShortInfo, error) {
@@ -41,12 +40,16 @@ func (db *appdbimpl) GetBanned(id string, req_id string) ([]UserShortInfo, error
 
 	bannedListAttr, ok := result.Item["banned"]
 	if !ok {
-		return nil, nil
+		return nil, nil // No banned users
 	}
 
 	bannedList, ok := bannedListAttr.(*types.AttributeValueMemberL)
 	if !ok {
 		return nil, fmt.Errorf("banned attribute is not a list")
+	}
+
+	if len(bannedList.Value) == 0 {
+		return nil, nil // No banned users
 	}
 
 	keys := []map[string]types.AttributeValue{}
@@ -56,6 +59,10 @@ func (db *appdbimpl) GetBanned(id string, req_id string) ([]UserShortInfo, error
 				"id": &types.AttributeValueMemberS{Value: idAttr.Value},
 			})
 		}
+	}
+
+	if len(keys) == 0 {
+		return nil, nil // No keys to query
 	}
 
 	batchGetInput := &dynamodb.BatchGetItemInput{
@@ -71,14 +78,16 @@ func (db *appdbimpl) GetBanned(id string, req_id string) ([]UserShortInfo, error
 		return nil, fmt.Errorf("failed to batch get users: %w", err)
 	}
 
+	/*
 	items := []map[string]types.AttributeValue{}
 	err = attributevalue.UnmarshalListOfMaps(batchGetResult.Responses["User"], &items)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal users: %w", err)
 	}
+	*/
 
 	// Print the items
-	for _, item := range items {
+	for _, item := range batchGetResult.Responses["User"] {
 		var user UserShortInfo
 		if idAttr, ok := item["id"].(*types.AttributeValueMemberS); ok {
 			user.Id = idAttr.Value
