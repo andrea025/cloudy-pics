@@ -43,6 +43,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
+	"wasa-photo.uniroma1.it/wasa-photo/service/storage"
 )
 
 // Config is used to provide dependencies and configuration to the New function.
@@ -50,8 +51,11 @@ type Config struct {
 	// Logger where log entries are sent
 	Logger logrus.FieldLogger
 
-	// Database is the instance of database.AppDatabase where data are saved
+	// Database is the instance of database_nosql.AppDatabase where data are saved
 	Database database_nosql.AppDatabase
+
+	// Storage is an instance of S3 bucket where to store images
+	Storage storage.AppStorage
 }
 
 // Router is the package API interface representing an API handler builder
@@ -83,6 +87,7 @@ func New(cfg Config) (Router, error) {
 		router:     router,
 		baseLogger: cfg.Logger,
 		db:         cfg.Database,
+		s3: 	cfg.Storage,
 	}, nil
 }
 
@@ -94,4 +99,6 @@ type _router struct {
 	baseLogger logrus.FieldLogger
 
 	db database_nosql.AppDatabase
+
+	s3 storage.AppStorage
 }

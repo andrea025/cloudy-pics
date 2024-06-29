@@ -47,9 +47,7 @@ type AppDatabase interface {
     GetMyStream(id string) ([]Photo, error)
     GetPhoto(id string, req_id string) (Photo, error)
     GetUserProfile(id string, req_id string) (User, error)
-
-    // Ping checks whether the database is available or not (in that case, an error will be returned)
-    Ping() error
+    CheckConnectivity() error
 }
 
 type appdbimpl struct {
@@ -71,7 +69,7 @@ func GetItem(c *dynamodb.Client, tableName string, key DynoNotation) (item DynoN
 
 func New(db *dynamodb.Client) (AppDatabase, error) {
 	if db == nil {
-		return nil, errors.New("database is required when building a AppDatabase")
+		return nil, errors.New("dynamodb client is required when building an AppDatabase")
 	}
 
 	ctx := context.TODO()
@@ -139,8 +137,8 @@ func New(db *dynamodb.Client) (AppDatabase, error) {
     }, nil
 }
 
-func (db *appdbimpl) Ping() error {
-    // DynamoDB does not have a direct Ping equivalent.
+// Checks whether the DynamoDB is available or not (in that case, an error will be returned)
+func (db *appdbimpl) CheckConnectivity() error {
     // We can list tables as a simple way to check connectivity.
     _, err := db.c.ListTables(context.TODO(), &dynamodb.ListTablesInput{})
     return err

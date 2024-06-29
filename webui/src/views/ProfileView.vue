@@ -20,7 +20,7 @@ export default {
       banned: [],
       isFollowing: null,
       isBanned: null,
-      photoBaseUrl: __API_URL__,
+      photoBaseUrl: __BASE_URL__,
     };
   },
   methods: {

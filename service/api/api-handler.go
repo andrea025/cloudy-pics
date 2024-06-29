@@ -26,7 +26,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.DELETE("/users/:user_id/following/:target_user_id", rt.auth(rt.wrap(rt.unfollowUser), true))
 	rt.router.PUT("/users/:user_id/banned/:target_user_id", rt.auth(rt.wrap(rt.banUser), true))
 	rt.router.DELETE("/users/:user_id/banned/:target_user_id", rt.auth(rt.wrap(rt.unbanUser), true))
-	rt.router.GET("/storage/:filename", rt.wrap(rt.getFilePhoto))
+	//rt.router.GET("/storage/:filename", rt.wrap(rt.getFilePhoto))
 
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)

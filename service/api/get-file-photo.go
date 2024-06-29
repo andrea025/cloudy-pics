@@ -1,5 +1,5 @@
 package api
-
+/*
 import (
 	"net/http"
 
@@ -10,3 +10,4 @@ import (
 func (rt *_router) getFilePhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	http.ServeFile(w, r, storageBasePath+ps.ByName("filename"))
 }
+*/

@@ -21,7 +21,7 @@ export default {
       hasLike: false,
       commentsVisibility: false,
       commentText: '',
-      photoBaseUrl: __API_URL__,
+      photoBaseUrl: __BASE_URL__,
     };
   },
   methods: {

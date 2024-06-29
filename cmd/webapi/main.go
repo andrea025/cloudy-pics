@@ -38,9 +38,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
+	"wasa-photo.uniroma1.it/wasa-photo/service/storage"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
     "github.com/aws/aws-sdk-go-v2/service/dynamodb"
+    "github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 // main is the program entry point. The only purpose of this function is to call run() and set the exit code if there is
@@ -106,13 +108,21 @@ func run() error {
 		_ = sess.Close()
 	}()
 	*/
-	svc := dynamodb.NewFromConfig(conf)
+	dynamodbClient := dynamodb.NewFromConfig(conf)
 	
 	// db, err := database.New(dbconn)
-	db, err := database_nosql.New(svc)
+	db, err := database_nosql.New(dynamodbClient)
 	if err != nil {
 		logger.WithError(err).Error("error creating AppDatabase")
 		return fmt.Errorf("creating AppDatabase: %w", err)
+	}
+
+	// Start S3 bucket session for photo storage
+	s3Client := s3.NewFromConfig(conf) 
+	s3, err := storage.New(s3Client)
+	if err != nil {
+		logger.WithError(err).Error("error creating AppStorage")
+		return fmt.Errorf("creating AppStorage: %w", err)
 	}
 
 	// Start (main) API server
@@ -131,6 +141,7 @@ func run() error {
 	apirouter, err := api.New(api.Config{
 		Logger:   logger,
 		Database: db,
+		Storage: s3,
 	})
 	if err != nil {
 		logger.WithError(err).Error("error creating the API server instance")
@@ -162,16 +173,6 @@ func run() error {
 		serverErrors <- apiserver.ListenAndServe()
 		logger.Infof("stopping API server")
 	}()
-
-	// Create storage for photos
-	path := "./storage"
-	if _, err = os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(path, os.ModePerm)
-		if err != nil {
-			logger.WithError(err).Error("error creating storage for photos")
-			return fmt.Errorf("creating storage for photos: %w", err)
-		}
-	}
 
 	// Waiting for shutdown signal or POSIX signals
 	select {

@@ -5,19 +5,16 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"io"
 	"math/big"
 	"net/http"
-	"os"
 	"strings"
 	"time"
+	"bytes"
 
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
 )
-
-var storageBasePath string = "./storage/"
 
 type Photo struct {
 	Id              string             `json:"id"`
@@ -99,7 +96,8 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	// reading the image
-	body, err := io.ReadAll(r.Body)
+	var body bytes.Buffer
+	_, err := body.ReadFrom(r.Body)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't read the binary string in the body of the request")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -116,26 +114,19 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	pid := fmt.Sprintf("%x", md5.Sum([]byte(strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]+rdm.Text(2))))
 	filename := pid + "." + strings.Split(ctype, "/")[1]
 
-	file, e := os.Create(storageBasePath + filename)
-	if e != nil {
-		ctx.Logger.WithError(e).Error("can't create the file for the photo")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer file.Close()
-
-	_, err = file.Write(body)
+	// Upload the contents of the body buffer to S3 buffer
+	err = rt.s3.UploadPhoto(filename, body)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't write the photo on the file")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	  	ctx.Logger.WithError(err).Error("Error uploading photo to s3 bucket")
+	  	w.WriteHeader(http.StatusInternalServerError)
+	  	return
 	}
 
 	// insert the new record into a table
 	var photo Photo
 	creation := (time.Now()).Format(time.RFC3339)
 	creation_datetime := creation[0:10] + " " + creation[11:19] // correct format
-	url := "/storage/" + filename
+	url := filename
 
 	dbphoto, erro := rt.db.UploadPhoto(pid, creation_datetime, url, strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
 	if erro != nil {

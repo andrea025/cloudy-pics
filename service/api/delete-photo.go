@@ -3,7 +3,6 @@ package api
 import (
 	"errors"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
@@ -27,13 +26,14 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	
+	// Delete the photo from s3 bucket
+	err = rt.s3.DeletePhoto(url)
 
-	url_parts := strings.Split(url, "/")
-	path := storageBasePath + url_parts[len(url_parts)-1]
-	err = os.Remove(path)
 	if err != nil {
-		ctx.Logger.WithError(err).WithField("id", pid).Error("can't delete the photo form the filesystem")
+	    ctx.Logger.WithError(err).WithField("id", pid).Error("can't delete the photo form s3 bucket")
 		w.WriteHeader(http.StatusInternalServerError)
+	    return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
