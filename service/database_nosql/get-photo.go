@@ -43,19 +43,19 @@ func (db *appdbimpl) GetPhoto(id string, req_id string) (Photo, error) {
 	input = &dynamodb.GetItemInput{
 		TableName: aws.String("User"),
 		Key: map[string]types.AttributeValue{
-    		"id": &types.AttributeValueMemberS{Value: owner_id},
+			"id": &types.AttributeValueMemberS{Value: owner_id},
 		},
 	}
 
-	result, err = db.c.GetItem(context.TODO(), input)
-		if err != nil {
+	resultUser, erro := db.c.GetItem(context.TODO(), input)
+	if erro != nil {
 		return photo, fmt.Errorf("failed to get user: %w", err)
 	}
 
-	usernameAttr, ok := result.Item["username"].(*types.AttributeValueMemberS)
-    if !ok {
-        return photo, fmt.Errorf("username attribute is not a string")
-    }
+	usernameAttr, ok := resultUser.Item["username"].(*types.AttributeValueMemberS)
+	if !ok {
+		return photo, fmt.Errorf("username attribute is not a string")
+	}
 	photo.Owner = UserShortInfo{Id: owner_id, Username: usernameAttr.Value}
 
 	urlAttr, ok := result.Item["url"].(*types.AttributeValueMemberS)
@@ -81,31 +81,48 @@ func (db *appdbimpl) GetPhoto(id string, req_id string) (Photo, error) {
 		return photo, fmt.Errorf("likes attribute is not a list")
 	}
 
-	// Convert the list to a slice of types.AttributeValue
-	var likesIds []types.AttributeValue
+	if len(likesList.Value) == 0 {
+		return photo, nil // No likes
+	}
+
+	// Extract user IDs from the likes list
+	var userIds []string
 	for _, item := range likesList.Value {
-		if idAttr, ok := item.(*types.AttributeValueMemberS); ok {
-			likesIds = append(likesIds, idAttr)
+		idAttr, ok := item.(*types.AttributeValueMemberS)
+		if !ok {
+			return photo, fmt.Errorf("user id in the likes list is not a string")
 		}
+		userIds = append(userIds, idAttr.Value)
 	}
 
-	queryInput := &dynamodb.QueryInput{
-		TableName: aws.String("User"),
-		FilterExpression: aws.String("id IN (:likesList)"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":likesList": &types.AttributeValueMemberL{Value: likesIds},
+	// Build keys for BatchGetItem
+	likesKeys := make([]map[string]types.AttributeValue, len(userIds))
+	for i, userId := range userIds {
+		likesKeys[i] = map[string]types.AttributeValue{"id": &types.AttributeValueMemberS{Value: userId}}
+	}
+
+	if len(likesKeys) == 0 {
+		return photo, nil // No keys to query
+	}
+
+	batchGetInput := &dynamodb.BatchGetItemInput{
+		RequestItems: map[string]types.KeysAndAttributes{
+			"User": {
+				Keys: likesKeys,
+				ProjectionExpression: aws.String("id, username"),
+			},
 		},
-		ProjectionExpression: aws.String("id, username"),
 	}
 
-	// Execute the query
-	queryResult, err := db.c.Query(context.TODO(), queryInput)
+	// Execute the BatchGetItem
+	batchGetResult, err := db.c.BatchGetItem(context.TODO(), batchGetInput)
 	if err != nil {
-		return photo, fmt.Errorf("failed to query users: %w", err)
+		return photo, fmt.Errorf("failed to batch get users: %w", err)
 	}
 
-	// Process the query results
-	for _, item := range queryResult.Items {
+	// Process the results
+	users := batchGetResult.Responses["User"]
+	for _, item := range users {
 		var user UserShortInfo
 		userIdAttr, ok := item["id"].(*types.AttributeValueMemberS)
 		if !ok {
@@ -139,8 +156,6 @@ func (db *appdbimpl) GetPhoto(id string, req_id string) (Photo, error) {
 		return photo, fmt.Errorf("comments attribute is not a list")
 	}
 
-
-	// SI POTREBBE OTTIMIZZARE TIPO
 	for _, item := range commentsList.Value {
 		commentAttrMap, ok := item.(*types.AttributeValueMemberM)
 		if !ok {
@@ -160,22 +175,22 @@ func (db *appdbimpl) GetPhoto(id string, req_id string) (Photo, error) {
 			return photo, err
 		} else if !userBanned {
 			input := &dynamodb.GetItemInput{
-        		TableName: aws.String("User"),
-        		Key: map[string]types.AttributeValue{
-            		"id": &types.AttributeValueMemberS{Value: comment.User.Id},
-        		},
-    		}
+				TableName: aws.String("User"),
+				Key: map[string]types.AttributeValue{
+					"id": &types.AttributeValueMemberS{Value: comment.User.Id},
+				},
+			}
 
-    		result, err := db.c.GetItem(context.TODO(), input)
-    			if err != nil {
-        		return photo, fmt.Errorf("failed to get user: %w", err)
-    		}
+			result, err := db.c.GetItem(context.TODO(), input)
+			if err != nil {
+				return photo, fmt.Errorf("failed to get user: %w", err)
+			}
 
-    		usernameAttr, ok := result.Item["username"].(*types.AttributeValueMemberS)
-		    if !ok {
-		        return photo, fmt.Errorf("username attribute is not a string")
-		    }
-		    comment.User.Username = usernameAttr.Value
+			usernameAttr, ok := result.Item["username"].(*types.AttributeValueMemberS)
+			if !ok {
+				return photo, fmt.Errorf("username attribute is not a string")
+			}
+			comment.User.Username = usernameAttr.Value
 
 			photo.Comments.Comments = append(photo.Comments.Comments, comment)
 			photo.Comments.Count++

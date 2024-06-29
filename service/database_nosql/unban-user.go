@@ -37,31 +37,12 @@ func (db *appdbimpl) UnbanUser(user_id string, target_user_id string) error {
 		return ErrUserDoesNotExist
 	}
 
-	// Update banned list
-    updateInput := &dynamodb.UpdateItemInput{
-        TableName: aws.String("User"),
-        Key: map[string]types.AttributeValue{
-            "id": &types.AttributeValueMemberS{Value: user_id},
-        },
-        UpdateExpression: aws.String("SET banned = list_remove(banned, :indices)"),
-        ConditionExpression: aws.String("contains(banned, :target_user_id)"),
-        ExpressionAttributeValues: map[string]types.AttributeValue{
-            ":target_user_id": &types.AttributeValueMemberS{Value: target_user_id},
-            ":indices": &types.AttributeValueMemberL{
-                Value: []types.AttributeValue{
-                    &types.AttributeValueMemberN{Value: "0"}, // Placeholder, to be calculated
-                },
-            },
-        },
-        ReturnValues: types.ReturnValueUpdatedNew,
-    }
-
     // Find the index of the target_user_id in the banned list
-    bannedList := result.Item["banned"].(*types.AttributeValueMemberSS).Value
+    bannedList := result.Item["banned"].(*types.AttributeValueMemberL)
     var index int
     found := false
-    for i, v := range bannedList {
-        if v == target_user_id {
+    for i, v := range bannedList.Value {
+        if v.(*types.AttributeValueMemberS).Value == target_user_id {
             index = i
             found = true
             break
@@ -72,12 +53,28 @@ func (db *appdbimpl) UnbanUser(user_id string, target_user_id string) error {
         return ErrCannotUnban
     }
 
+	// Update banned list
+    updateInput := &dynamodb.UpdateItemInput{
+        TableName: aws.String("User"),
+        Key: map[string]types.AttributeValue{
+            "id": &types.AttributeValueMemberS{Value: user_id},
+        },
+        UpdateExpression: aws.String("REMOVE banned[" + fmt.Sprintf("%d", index) + "]"),
+        ConditionExpression: aws.String("contains(banned, :target_user_id)"),
+        ExpressionAttributeValues: map[string]types.AttributeValue{
+            ":target_user_id": &types.AttributeValueMemberS{Value: target_user_id},
+        },
+        ReturnValues: types.ReturnValueUpdatedNew,
+    }
+
+    /*
     // Update the ExpressionAttributeValues with the correct index
     updateInput.ExpressionAttributeValues[":indices"] = &types.AttributeValueMemberL{
         Value: []types.AttributeValue{
             &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", index)},
         },
     }
+    */
 
     _, err = db.c.UpdateItem(context.TODO(), updateInput)
     if err != nil {

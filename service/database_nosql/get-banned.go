@@ -23,7 +23,7 @@ func (db *appdbimpl) GetBanned(id string, req_id string) ([]UserShortInfo, error
 
 	result, err := db.c.GetItem(context.TODO(), input)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, fmt.Errorf("failed to get user item: %w", err)
 	}
 
 	if result.Item == nil {
@@ -40,7 +40,7 @@ func (db *appdbimpl) GetBanned(id string, req_id string) ([]UserShortInfo, error
 
 	bannedListAttr, ok := result.Item["banned"]
 	if !ok {
-		return nil, nil // No banned users
+		return nil, fmt.Errorf("no banned attribute in user item")
 	}
 
 	bannedList, ok := bannedListAttr.(*types.AttributeValueMemberL)

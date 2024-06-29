@@ -14,7 +14,7 @@ export default defineConfig(({command, mode, ssrBuild}) => {
 		},
 	};
 	ret.define = {
-		"__API_URL__": JSON.stringify("http://23.20.119.30:3000"),
+		"__API_URL__": JSON.stringify("http://54.87.63.155:3000"),
 	};
 	return ret;
 })

@@ -29,7 +29,7 @@ func (db *appdbimpl) GetFollowing(id string, req_id string) ([]UserShortInfo, er
 
 	result, err := db.c.GetItem(context.TODO(), input)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, fmt.Errorf("failed to get user item: %w", err)
 	}
 
 	if result.Item == nil {
@@ -46,7 +46,7 @@ func (db *appdbimpl) GetFollowing(id string, req_id string) ([]UserShortInfo, er
 
 	followingListAttr, ok := result.Item["following"]
 	if !ok {
-		return nil, nil
+		return nil, fmt.Errorf("no following attribute in user item")
 	}
 
 	followingList, ok := followingListAttr.(*types.AttributeValueMemberL)

@@ -19,6 +19,7 @@ func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httpro
 
 	dbstream, err := rt.db.GetMyStream(uid)
 	if err != nil {
+		ctx.Logger.WithError(err).Error("can't get the stream")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -64,6 +64,30 @@ func (db *appdbimpl) LikePhoto(photo_id string, user_id string) error {
 		return ErrBanned
 	}
 
+	likesListAttr, ok := result.Item["likes"]
+	if !ok {
+		return fmt.Errorf("no likes attribute in the list")
+	}
+
+	likesList, ok := likesListAttr.(*types.AttributeValueMemberL)
+	if !ok {
+		return fmt.Errorf("likes attribute is not a list")
+	}
+
+	if len(likesList.Value) != 0 {
+		for _, like := range likesList.Value {
+			likeS, ok := like.(*types.AttributeValueMemberS)
+			if !ok {
+				return fmt.Errorf("user id in the likes list is not a string")
+			}
+
+            if likeS.Value == user_id {
+                // User ID already exists, no need to update
+                return nil
+            }
+		}
+	}
+
 	// Add like to the likes list
 	updateInput := &dynamodb.UpdateItemInput{
 		TableName: aws.String("Photo"),
@@ -78,7 +102,6 @@ func (db *appdbimpl) LikePhoto(photo_id string, user_id string) error {
 			":user":       &types.AttributeValueMemberL{Value: []types.AttributeValue{&types.AttributeValueMemberS{Value: user_id}}},
 			":empty_list": &types.AttributeValueMemberL{Value: []types.AttributeValue{}},
 		},
-		ConditionExpression: aws.String("attribute_not_contains(#likes, :user)"),
 	}
 
 	_, err = db.c.UpdateItem(context.TODO(), updateInput)

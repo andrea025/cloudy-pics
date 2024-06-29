@@ -33,7 +33,6 @@ func (db *appdbimpl) DeletePhoto(photo_id string, req_id string) (string, error)
         Key: map[string]types.AttributeValue{
             "id": &types.AttributeValueMemberS{Value: photo_id},
         },
-        ProjectionExpression: aws.String("url, owner"),
     }
 
     getItemOutput, err := db.c.GetItem(context.TODO(), getItemInput)

@@ -4,43 +4,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"context"
 	"fmt"
 )
 
 func (db *appdbimpl) GetMyStream(id string) ([]Photo, error) {
-	/*
-	stream := []Photo{}
-
-	sqlStmt := `SELECT id FROM Photo WHERE owner in (select user_followed from Following where user_following = ? AND user_followed not in (select user_banning from Banned where user_banned = ?)) ORDER BY created_at DESC LIMIT 50;`
-	rows, err := db.c.Query(sqlStmt, id, id)
-	if err != nil {
-		return []Photo{}, err
-	}
-	defer func() { _ = rows.Close() }()
-
-	for rows.Next() {
-		var pid string
-		err = rows.Scan(&pid)
-		if err != nil {
-			return []Photo{}, err
-		}
-
-		var photo Photo
-		photo, err = db.GetPhoto(pid, id)
-		if err != nil {
-			return []Photo{}, err
-		}
-		stream = append(stream, photo)
-	}
-	if err = rows.Err(); err != nil {
-		return []Photo{}, err
-	}
-
-	return stream, nil
-	*/
-
 	stream := []Photo{}
 
 	// Step 1: Get the list of users followed by the user
@@ -60,12 +28,14 @@ func (db *appdbimpl) GetMyStream(id string) ([]Photo, error) {
 		return nil, ErrUserDoesNotExist
 	}
 
-	var user struct {
-		Following []string `dynamodbav:"following"`
+	followingListAttr, ok := userOutput.Item["following"]
+	if !ok {
+		return nil, fmt.Errorf("no following attribute in user item")
 	}
-	err = attributevalue.UnmarshalMap(userOutput.Item, &user)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal user data: %w", err)
+
+	followingList, ok := followingListAttr.(*types.AttributeValueMemberL)
+	if !ok {
+		return nil, fmt.Errorf("following attribute is not a list")
 	}
 
 	// Step 2: Get the list of users who have banned the current user
@@ -85,21 +55,22 @@ func (db *appdbimpl) GetMyStream(id string) ([]Photo, error) {
 
 	bannedByIds := make(map[string]struct{})
 	for _, item := range bannedByOutput.Items {
-		var bannedByUser struct {
-			Id string `dynamodbav:"id"`
+		idAttr, ok := item["id"].(*types.AttributeValueMemberS)
+		if !ok {
+			return nil, fmt.Errorf("id attribute is not a string")
 		}
-		err = attributevalue.UnmarshalMap(item, &bannedByUser)
-		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal banned user data: %w", err)
-		}
-		bannedByIds[bannedByUser.Id] = struct{}{}
+		bannedByIds[idAttr.Value] = struct{}{}
 	}
 
 	// Step 3: Filter followed users to exclude users who have banned the current user
 	filteredFollowingIds := []string{}
-	for _, fid := range user.Following {
-		if _, banned := bannedByIds[fid]; !banned {
-			filteredFollowingIds = append(filteredFollowingIds, fid)
+	for _, fidAttr := range followingList.Value {
+		fid, ok := fidAttr.(*types.AttributeValueMemberS)
+		if !ok {
+			return nil, fmt.Errorf("following list item is not a string")
+		}
+		if _, banned := bannedByIds[fid.Value]; !banned {
+			filteredFollowingIds = append(filteredFollowingIds, fid.Value)
 		}
 	}
 
@@ -108,10 +79,13 @@ func (db *appdbimpl) GetMyStream(id string) ([]Photo, error) {
 		photoInput := &dynamodb.QueryInput{
 			TableName:              aws.String("Photo"),
 			IndexName:              aws.String("owner-created_at-index"), // Assuming GSI on owner and created_at
-			KeyConditionExpression: aws.String("owner = :owner"),
+			KeyConditionExpression: aws.String("#owner = :owner"),
 			ExpressionAttributeValues: map[string]types.AttributeValue{
 				":owner": &types.AttributeValueMemberS{Value: followedId},
 			},
+			ExpressionAttributeNames: map[string]string{
+            	"#owner": "owner",
+        	},
 			ScanIndexForward: aws.Bool(false), // Descending order
 			Limit:            aws.Int32(50),
 		}
@@ -129,7 +103,7 @@ func (db *appdbimpl) GetMyStream(id string) ([]Photo, error) {
 				return nil, fmt.Errorf("id attribute is not a string")
 			}
 			photo_id := photoIdAttr.Value
-			
+
 			photo, err = db.GetPhoto(photo_id, id)
 			if err != nil {
 				return nil, err
@@ -137,9 +111,9 @@ func (db *appdbimpl) GetMyStream(id string) ([]Photo, error) {
 			stream = append(stream, photo)
 
 			/*
-			if len(stream) >= 50 {
-				return stream, nil
-			}
+				if len(stream) >= 50 {
+					return stream, nil
+				}
 			*/
 		}
 	}

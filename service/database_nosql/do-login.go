@@ -36,7 +36,7 @@ func (db *appdbimpl) DoLogin(username string) (string, error) {
             Item: map[string]types.AttributeValue{
                 "id":       &types.AttributeValueMemberS{Value: id},
                 "username": &types.AttributeValueMemberS{Value: username},
-                "followers": &types.AttributeValueMemberL{
+                "following": &types.AttributeValueMemberL{
                     Value: []types.AttributeValue{}, // Empty list
                 },
                 "banned": &types.AttributeValueMemberL{

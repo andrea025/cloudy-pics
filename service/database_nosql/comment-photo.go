@@ -57,7 +57,6 @@ func (db *appdbimpl) CommentPhoto(cid string, pid string, uid string, text strin
         Key: map[string]types.AttributeValue{
             "id": &types.AttributeValueMemberS{Value: pid},
         },
-        ProjectionExpression: aws.String("owner"),
     }
 
     result, err := db.c.GetItem(context.TODO(), input)
