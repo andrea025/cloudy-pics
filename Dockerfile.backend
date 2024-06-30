@@ -20,7 +20,7 @@ EXPOSE 3000 4000
 ### Copy the build executable from the builder image
 WORKDIR /app/
 COPY --from=builder /app/webapi ./
-RUN mkdir -p -m a=rwx ./storage
+RUN mkdir -p -m a=rwx ~/.aws
 
 ### Executable command
 CMD ["/app/webapi"]

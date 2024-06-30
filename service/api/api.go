@@ -76,6 +76,9 @@ func New(cfg Config) (Router, error) {
 	if cfg.Database == nil {
 		return nil, errors.New("database is required")
 	}
+	if cfg.Storage == nil {
+		return nil, errors.New("storage is required")
+	}
 
 	// Create a new router where we will register HTTP endpoints. The server will pass requests to this router to be
 	// handled.
@@ -87,7 +90,7 @@ func New(cfg Config) (Router, error) {
 		router:     router,
 		baseLogger: cfg.Logger,
 		db:         cfg.Database,
-		s3: 	cfg.Storage,
+		s3: 		cfg.Storage,
 	}, nil
 }
 

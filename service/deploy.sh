@@ -35,7 +35,7 @@ ssh learnerlab "sudo docker ps -q -a --filter name=frontend | xargs sudo docker 
 
 # Start container in daemon mode
 ssh learnerlab "sudo docker run -d --name frontend -p 80:80 frontend:latest"
-ssh learnerlab "sudo docker run --name backend -p 3000:3000 -p 4000:4000 backend:latest"
+ssh learnerlab "sudo docker run --name backend -v ~/.aws:/root/.aws -p 3000:3000 -p 4000:4000 backend:latest"
 ssh learnerlab "docker rmi -f $(sudo docker images -aq)"
 
 # Test the connection

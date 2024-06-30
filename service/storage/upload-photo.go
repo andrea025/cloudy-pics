@@ -15,5 +15,9 @@ func (s3_storage *apps3impl) UploadPhoto(filename string, image bytes.Buffer) er
 	  	Body:   bytes.NewReader(image.Bytes()),
 	})
 
+	// WAIT A BIT.............
+	// IF getObject DOES NOT RETURN THE PIC, GENERATE A CUSTOM ERORR THAT SAYS "AYO! PORNO!"
+
+
 	return err
 }
