@@ -39,11 +39,11 @@ import (
 	"wasa-photo.uniroma1.it/wasa-photo/service/api"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
 	"wasa-photo.uniroma1.it/wasa-photo/service/storage"
-	//"wasa-photo.uniroma1.it/wasa-photo/service/lambdafunc"
+	"wasa-photo.uniroma1.it/wasa-photo/service/lambdafunc"
 	"github.com/aws/aws-sdk-go-v2/config"
     "github.com/aws/aws-sdk-go-v2/service/dynamodb"
     "github.com/aws/aws-sdk-go-v2/service/s3"
-    //"github.com/aws/aws-sdk-go-v2/service/lambda"
+    "github.com/aws/aws-sdk-go-v2/service/lambda"
 )
 
 // main is the program entry point. The only purpose of this function is to call run() and set the exit code if there is
@@ -113,11 +113,16 @@ func run() error {
 		return fmt.Errorf("creating AppStorage: %w", err)
 	}
 
-	/*
 	// Start AWS Lambda service
 	logger.Println("initializing lambda support")
 	lambdaClient := lambda.NewFromConfig(conf)
+	lambdafunc, err := lambdafunc.New(lambdaClient)
+	if err != nil {
+		logger.WithError(err).Error("error creating AppLambda")
+		return fmt.Errorf("creating AppLambda: %w", err)
+	}
 
+	/*
     functionName := "image-rekognition"
     //payload := []byte(`{"key": "value"}`)
     resp, err := lambdaClient.Invoke(context.TODO(), &lambda.InvokeInput{
@@ -150,6 +155,7 @@ func run() error {
 		Logger:   logger,
 		Database: db,
 		Storage: s3,
+		Lambda: lambdafunc,
 	})
 	if err != nil {
 		logger.WithError(err).Error("error creating the API server instance")

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 	"bytes"
+	"errors"
 
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
@@ -74,6 +75,8 @@ func (cc *CommentsCollection) FromDatabase(ccdb database_nosql.CommentsCollectio
 	}
 }
 
+var ErrPhotoDoesNotExist = errors.New("photo does not exist")
+
 func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// make sure the binary file in the body request is an image (actually it is not a proper check for its validity, since the client is taking the image/png from the extension of the file being uploaded, but fair enough)
 	ctype := strings.Split(r.Header.Get("Content-type"), ";")[0]
@@ -118,6 +121,27 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	err = rt.s3.UploadPhoto(filename, body)
 	if err != nil {
 	  	ctx.Logger.WithError(err).Error("Error uploading photo to s3 bucket")
+	  	w.WriteHeader(http.StatusInternalServerError)
+	  	return
+	}
+
+	// Invoke the Lambda function image-rekognition
+	err = rt.lambda.ExecuteLambdaFunction("image-rekognition") // USE ENUM HERE
+	if err != nil {
+	  	ctx.Logger.WithError(err).Error("Failed to invoke Lambda function")
+	  	w.WriteHeader(http.StatusInternalServerError)
+	  	return
+	}
+
+	// CHECK THIS PIECE OF CODE
+	err = rt.s3.CheckPhoto(filename)
+	if err != nil {
+		if errors.Is(err, ErrPhotoDoesNotExist) {
+			ctx.Logger.WithError(err).Error("The photo violates our content policy")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		ctx.Logger.WithError(err).Error("Failed to retrieve photo from s3 bucket")
 	  	w.WriteHeader(http.StatusInternalServerError)
 	  	return
 	}

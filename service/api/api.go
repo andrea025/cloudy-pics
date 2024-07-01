@@ -44,6 +44,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
 	"wasa-photo.uniroma1.it/wasa-photo/service/storage"
+	"wasa-photo.uniroma1.it/wasa-photo/service/lambdafunc"
 )
 
 // Config is used to provide dependencies and configuration to the New function.
@@ -56,6 +57,9 @@ type Config struct {
 
 	// Storage is an instance of S3 bucket where to store images
 	Storage storage.AppStorage
+
+	// Lambda 
+	Lambda lambdafunc.AppLambda
 }
 
 // Router is the package API interface representing an API handler builder
@@ -79,6 +83,9 @@ func New(cfg Config) (Router, error) {
 	if cfg.Storage == nil {
 		return nil, errors.New("storage is required")
 	}
+	if cfg.Lambda == nil {
+		return nil, errors.New("lambda is required")
+	}
 
 	// Create a new router where we will register HTTP endpoints. The server will pass requests to this router to be
 	// handled.
@@ -91,6 +98,7 @@ func New(cfg Config) (Router, error) {
 		baseLogger: cfg.Logger,
 		db:         cfg.Database,
 		s3: 		cfg.Storage,
+		lambda: 	cfg.Lambda,
 	}, nil
 }
 
@@ -104,4 +112,6 @@ type _router struct {
 	db database_nosql.AppDatabase
 
 	s3 storage.AppStorage
+
+	lambda lambdafunc.AppLambda
 }

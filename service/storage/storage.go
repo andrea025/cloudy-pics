@@ -14,6 +14,7 @@ var bucket string = "cloudy-pics"
 type AppStorage interface {
     UploadPhoto(filename string, image bytes.Buffer) error
     DeletePhoto(filename string) error
+    CheckPhoto(filename string) error
     CheckConnectivity() error
 }
 
