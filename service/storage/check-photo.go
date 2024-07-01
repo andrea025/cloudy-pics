@@ -3,7 +3,7 @@ package storage
 import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-    "github.com/aws/aws-sdk-go-v2/service/s3/types"
+    //"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"context"
     "errors"
 )
@@ -17,12 +17,18 @@ func (s3_storage *apps3impl) CheckPhoto(filename string) error {
         Key:    aws.String(filename),
     })
 
+    /*
     if err != nil {
         var notFoundErr *types.NoSuchKey
         if errors.As(err, &notFoundErr) {
             return ErrPhotoDoesNotExist
         }
         return err
+    }
+    */
+
+    if err != nil {
+        return ErrPhotoDoesNotExist
     }
 
 	return nil

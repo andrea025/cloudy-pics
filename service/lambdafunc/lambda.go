@@ -7,8 +7,8 @@ import (
 
 // AppStorage is the high level interface for the AWS Rekognition service
 type AppLambda interface {
-    ExecuteLambdaFunction(functionName string) error
-    // Compression(filename string) error
+    InvokeRekognition(bucket, key string) error
+    InvokeCompression(bucket, key string) error
     // CheckConnectivity() error
 }
 

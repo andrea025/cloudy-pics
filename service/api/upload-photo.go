@@ -125,10 +125,19 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	  	return
 	}
 
+	
 	// Invoke the Lambda function image-rekognition
-	err = rt.lambda.ExecuteLambdaFunction("image-rekognition") // USE ENUM HERE
+	err = rt.lambda.InvokeRekognition("cloudy-pics", filename)
 	if err != nil {
-	  	ctx.Logger.WithError(err).Error("Failed to invoke Lambda function")
+	  	ctx.Logger.WithError(err).Error("Failed to invoke rekognition lambda function")
+	  	w.WriteHeader(http.StatusInternalServerError)
+	  	return
+	}
+
+	// Invoke the Lambda function image-rekognition
+	err = rt.lambda.InvokeCompression("cloudy-pics", filename)
+	if err != nil {
+	  	ctx.Logger.WithError(err).Error("Failed to invoke compression lambda function")
 	  	w.WriteHeader(http.StatusInternalServerError)
 	  	return
 	}
@@ -136,7 +145,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	// CHECK THIS PIECE OF CODE
 	err = rt.s3.CheckPhoto(filename)
 	if err != nil {
-		if errors.Is(err, ErrPhotoDoesNotExist) {
+		if err.Error() == ErrPhotoDoesNotExist.Error() {
 			ctx.Logger.WithError(err).Error("The photo violates our content policy")
 			w.WriteHeader(http.StatusBadRequest)
 			return
