@@ -27,16 +27,15 @@ cd "$(dirname "$0")" || exit
 # ssh learnerlab "rm -rf cloudy-pics && tar xzf backend.tar && tar xzf frontend.tar && rm backend.tar && rm frontend.tar"
 ssh learnerlab "rm -rf cloudy-pics && tar xzf cloudy-pics.tar && rm cloudy-pics.tar"
 ssh learnerlab "cd cloudy-pics && sudo docker build -f Dockerfile.backend -t backend:latest ."
-ssh learnerlab "cd cloudy-pics && sudo docker build -f Dockerfile.frontend -t frontend:latest ."
+ssh learnerlab "cd cloudy-pics && sudo docker build --build-arg API_IP=34.197.61.128 -f Dockerfile.frontend -t frontend:latest ."
 
 # Stop remote container if running
 ssh learnerlab "sudo docker ps -q -a --filter name=backend | xargs sudo docker rm -f" || true
 ssh learnerlab "sudo docker ps -q -a --filter name=frontend | xargs sudo docker rm -f" || true
 
 # Start container in daemon mode
+ssh learnerlab "sudo docker run -d --name backend -v /home/ec2-user/.aws:/root/.aws -p 3000:3000 -p 4000:4000 backend:latest"
 ssh learnerlab "sudo docker run -d --name frontend -p 80:80 frontend:latest"
-ssh learnerlab "sudo docker run --name backend -v ~/.aws:/root/.aws -p 3000:3000 -p 4000:4000 backend:latest"
-ssh learnerlab "docker rmi -f $(sudo docker images -aq)"
 
 # Test the connection
 VM_IP="$(grep learnerlab ~/.ssh/config -A10 | grep HostName | awk '{print $2}')"

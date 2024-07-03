@@ -1,18 +1,26 @@
 FROM node:lts as builder
 
+# Define a build argument
+ARG API_IP
+
+# Set an environment variable in the builder stage if needed
+ENV API_IP=$API_IP
+
 ### Copy Vue.js code
 WORKDIR /app
 COPY webui webui
 
 ### Build Vue.js into plain HTML/CSS/JS
 WORKDIR /app/webui
-#### TOGLILOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
 RUN npm install
 RUN npm run build-prod
 
-
 ### Create final container
 FROM nginx:stable
+
+# Set environment variable in the final stage
+ENV API_IP=$API_IP
 
 ### Copy the (built) app from the builder image
 COPY --from=builder /app/webui/dist /usr/share/nginx/html

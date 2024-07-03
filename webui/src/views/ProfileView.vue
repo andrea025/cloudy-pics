@@ -214,9 +214,9 @@ export default {
       fileReader.readAsDataURL(files[0]);
       const image = files[0];
 
-      if (!['image/jpeg', 'image/png'].includes(image.type)) {
+      if (!['image/jpeg', 'image/jpg'].includes(image.type)) {
         console.log(image.type);
-        this.errormsg = 'File type not supported, please upload a png or jpeg image.';
+        this.errormsg = 'File type not supported, please upload a jpg or jpeg or jpg image.';
         return;
       }
 
@@ -283,7 +283,7 @@ export default {
             <button class="clear-btn" @click="onPickFile">
               <NewPostIcon />
             </button>
-            <input type="file" style="display: none" ref="fileInput" accept=".png,.jpeg" @change="onFilePicked" />
+            <input type="file" style="display: none" ref="fileInput" accept=".jpg,.jpeg" @change="onFilePicked" />
           </div>
           <div class="block-2">
             <div class="user-stat">

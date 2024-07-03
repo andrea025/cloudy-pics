@@ -14,7 +14,7 @@ export default defineConfig(({command, mode, ssrBuild}) => {
 		},
 	};
 	ret.define = {
-		"__API_URL__": JSON.stringify("http://18.232.92.85:3000"),
+		"__API_URL__": JSON.stringify(`http://${process.env.API_IP}:3000`),
 		"__BASE_URL__": JSON.stringify("https://cloudy-pics.s3.amazonaws.com/"),
 	};
 	return ret;

@@ -80,7 +80,7 @@ var ErrPhotoDoesNotExist = errors.New("photo does not exist")
 func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// make sure the binary file in the body request is an image (actually it is not a proper check for its validity, since the client is taking the image/png from the extension of the file being uploaded, but fair enough)
 	ctype := strings.Split(r.Header.Get("Content-type"), ";")[0]
-	if ctype == "" || !(ctype == "image/png" || ctype == "image/jpeg") {
+	if ctype == "" || !(ctype == "image/jpeg" || ctype == "image/jpg") {
 		// the request has no Content-type header, therefore is not valid
 		// rt.baseLogger.Warning("uploadPhoto: a request has been sent without Content-type header or with Content-type header different than image/png and image/jpeg, the binary string sent in the request body is not valid")
 		w.WriteHeader(http.StatusBadRequest)
@@ -92,7 +92,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		// rt.baseLogger.Warning("uploadPhoto: a request has been sent without Content-length header")
 		w.WriteHeader(http.StatusBadRequest)
 		return
-	} else if clength > 1000000 { // 1 MB
+	} else if clength > 2000000 { // 2 MB
 		// rt.baseLogger.Warning("uploadPhoto: a request has been sent with a photo too big in size")
 		w.WriteHeader(http.StatusRequestEntityTooLarge)
 		return
@@ -125,19 +125,10 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	  	return
 	}
 
-	
 	// Invoke the Lambda function image-rekognition
 	err = rt.lambda.InvokeRekognition("cloudy-pics", filename)
 	if err != nil {
 	  	ctx.Logger.WithError(err).Error("Failed to invoke rekognition lambda function")
-	  	w.WriteHeader(http.StatusInternalServerError)
-	  	return
-	}
-
-	// Invoke the Lambda function image-rekognition
-	err = rt.lambda.InvokeCompression("cloudy-pics", filename)
-	if err != nil {
-	  	ctx.Logger.WithError(err).Error("Failed to invoke compression lambda function")
 	  	w.WriteHeader(http.StatusInternalServerError)
 	  	return
 	}
@@ -151,6 +142,14 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 			return
 		}
 		ctx.Logger.WithError(err).Error("Failed to retrieve photo from s3 bucket")
+	  	w.WriteHeader(http.StatusInternalServerError)
+	  	return
+	}
+
+	// Invoke the Lambda function compression lambda
+	err = rt.lambda.InvokeCompression("cloudy-pics", filename)
+	if err != nil {
+	  	ctx.Logger.WithError(err).Error("Failed to invoke compression lambda function")
 	  	w.WriteHeader(http.StatusInternalServerError)
 	  	return
 	}

@@ -40,6 +40,9 @@ import (
 	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
 	"wasa-photo.uniroma1.it/wasa-photo/service/storage"
 	"wasa-photo.uniroma1.it/wasa-photo/service/lambdafunc"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/config"
     "github.com/aws/aws-sdk-go-v2/service/dynamodb"
     "github.com/aws/aws-sdk-go-v2/service/s3"
@@ -86,17 +89,33 @@ func run() error {
 	logger.Infof("application initializing")
 
 	
-	// Create a custom AWS configuration with the provided credentials
-	// Load the default configuration, from ~/.aws/config (access region) and ~/.aws/credentials (access keys)
+	// Create a custom AWS configuration assuming the IAM LabRole
+	// Load the default configuration, from ~/.aws/config (access region)
     conf, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		logger.WithError(err).Error("error in creating an AWS session for dynamodb")
 		return fmt.Errorf("connecting to AWS for dynamodb: %w", err)
 	}
 
+	// Create an STS client
+    stsClient := sts.NewFromConfig(conf)
+
+    // Assume the IAM role
+    roleArn := "arn:aws:iam::449988400315:role/LabRole"
+    creds := stscreds.NewAssumeRoleProvider(stsClient, roleArn)
+
+    // Create a new AWS configuration using the temporary credentials
+    config, err := config.LoadDefaultConfig(context.TODO(),
+        config.WithCredentialsProvider(aws.NewCredentialsCache(creds)),
+    )
+    if err != nil {
+        logger.WithError(err).Error("unable to load SDK config with temporary credentials")
+        return fmt.Errorf("unable to load SDK config with temporal credentials: %v", err)
+    }
+
 	// Start Database
 	logger.Println("initializing database support")
-	dynamodbClient := dynamodb.NewFromConfig(conf)
+	dynamodbClient := dynamodb.NewFromConfig(config)
 	
 	db, err := database_nosql.New(dynamodbClient)
 	if err != nil {
@@ -106,7 +125,7 @@ func run() error {
 
 	// Start S3 bucket session for photo storage
 	logger.Println("initializing storage support")
-	s3Client := s3.NewFromConfig(conf) 
+	s3Client := s3.NewFromConfig(config) 
 	s3, err := storage.New(s3Client)
 	if err != nil {
 		logger.WithError(err).Error("error creating AppStorage")
@@ -115,28 +134,12 @@ func run() error {
 
 	// Start AWS Lambda service
 	logger.Println("initializing lambda support")
-	lambdaClient := lambda.NewFromConfig(conf)
+	lambdaClient := lambda.NewFromConfig(config)
 	lambdafunc, err := lambdafunc.New(lambdaClient)
 	if err != nil {
 		logger.WithError(err).Error("error creating AppLambda")
 		return fmt.Errorf("creating AppLambda: %w", err)
 	}
-
-	/*
-    functionName := "image-rekognition"
-    //payload := []byte(`{"key": "value"}`)
-    resp, err := lambdaClient.Invoke(context.TODO(), &lambda.InvokeInput{
-        FunctionName: aws.String(functionName),
-        //Payload:      payload,
-    })
-    if err != nil {
-        logger.WithError(err).Error("failed to invoke lambda function")
-		return fmt.Errorf("failed to invoke lambda function: %w", err)
-    }
-
-    // Print the response
-    fmt.Printf("Lambda response: %s\n", string(resp.Payload))
-    */
 
 	// Start (main) API server
 	logger.Info("initializing API server")
