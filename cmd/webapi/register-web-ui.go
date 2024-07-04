@@ -7,7 +7,7 @@ import (
 	"io/fs"
 	"net/http"
 	"strings"
-	"wasa-photo.uniroma1.it/wasa-photo/webui"
+	"cloudy-pics.uniroma1.it/cloudy-pics/webui"
 )
 
 func registerWebUI(hdl http.Handler) (http.Handler, error) {

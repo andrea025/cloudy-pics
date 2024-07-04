@@ -6,7 +6,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
-	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
+	"cloudy-pics.uniroma1.it/cloudy-pics/service/api/reqcontext"
 )
 
 // httpRouterHandler is the signature for functions that accepts a reqcontext.RequestContext in addition to those

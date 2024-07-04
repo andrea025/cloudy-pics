@@ -42,9 +42,9 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
-	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
-	"wasa-photo.uniroma1.it/wasa-photo/service/storage"
-	"wasa-photo.uniroma1.it/wasa-photo/service/lambdafunc"
+	"cloudy-pics.uniroma1.it/cloudy-pics/service/database_nosql"
+	"cloudy-pics.uniroma1.it/cloudy-pics/service/storage"
+	"cloudy-pics.uniroma1.it/cloudy-pics/service/lambdafunc"
 )
 
 // Config is used to provide dependencies and configuration to the New function.

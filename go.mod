@@ -1,4 +1,4 @@
-module wasa-photo.uniroma1.it/wasa-photo
+module cloudy-pics.uniroma1.it/cloudy-pics
 
 go 1.20
 

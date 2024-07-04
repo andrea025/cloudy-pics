@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
+	"cloudy-pics.uniroma1.it/cloudy-pics/service/api/reqcontext"
 )
 
 type Username struct {

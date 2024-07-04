@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
-	"wasa-photo.uniroma1.it/wasa-photo/service/database_nosql"
+	"cloudy-pics.uniroma1.it/cloudy-pics/service/api/reqcontext"
+	"cloudy-pics.uniroma1.it/cloudy-pics/service/database_nosql"
 )
 
 func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
