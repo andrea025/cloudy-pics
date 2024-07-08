@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const defaultEndpoint = "http://34.197.61.128:3000"
+const defaultEndpoint = "http://cloudy-pics-asg-lb-1051926860.us-east-1.elb.amazonaws.com:3000"
 
 const defaultTimeout = 1 * time.Second
 
@@ -78,7 +78,7 @@ func timeHTTPPostFile(url string, filePath string, fileName string, authorizatio
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		log("Error: could not open file", filePath)
+		fmt.Errorf("Error: could not open file %w", filePath)
 		panic(err)
 	}
 	defer file.Close()
@@ -89,24 +89,24 @@ func timeHTTPPostFile(url string, filePath string, fileName string, authorizatio
 	// Add the file to the request
 	part, err := writer.CreateFormFile("photo", fileName)
 	if err != nil {
-		log("Error: could not create form file")
+		fmt.Errorf("Error: could not create form file")
 		panic(err)
 	}
 
 	if _, err := io.Copy(part, file); err != nil {
-		log("Error: could not copy file to part")
+		fmt.Errorf("Error: could not copy file to part")
 		panic(err)
 	}
 
 	if err := writer.Close(); err != nil {
-		log("Error: could not close writer")
+		fmt.Errorf("Error: could not close writer")
 		panic(err)
 	}
 
 	// Create the request (without sending it)
 	req, err := http.NewRequest("POST", url, &requestBody)
 	if err != nil {
-		log("Error: could not create request")
+		fmt.Errorf("Error: could not create request")
 		panic(err)
 	}
 

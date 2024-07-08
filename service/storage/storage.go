@@ -8,7 +8,7 @@ import (
 	"context"
 )
 
-var bucket string = "cloudy-pics"
+var bucket string = "cloudypics"
 
 // AppStorage is the high level interface for the S3 bucket
 type AppStorage interface {

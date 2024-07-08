@@ -101,7 +101,7 @@ func run() error {
     stsClient := sts.NewFromConfig(conf)
 
     // Assume the IAM role
-    roleArn := "arn:aws:iam::449988400315:role/LabRole"
+    roleArn := "arn:aws:iam::905418406304:role/EC2_Role"
     creds := stscreds.NewAssumeRoleProvider(stsClient, roleArn)
 
     // Create a new AWS configuration using the temporary credentials

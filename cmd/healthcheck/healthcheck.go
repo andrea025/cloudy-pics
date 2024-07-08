@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"ec2-benchmarking/lib"
+	"cloudy-pics.uniroma1.it/cloudy-pics/cmd/healthcheck/utils"
 	"fmt"
 	"math"
 	"os"
@@ -19,10 +19,12 @@ const targetUrl = "/liveness"
 var requestTimes []int
 
 func makeHTTPRequest(url string, wg *sync.WaitGroup) {
-	duration, err := lib.TimeHTTPRequestWaiting(url, wg)
+	duration, err := utils.TimeHTTPRequestWaiting(url, wg)
 	if err != nil {
-		requestTimes = append(requestTimes, duration)
+		fmt.Errorf("failed benchmarking: %w", err)
+		return
 	}
+	requestTimes = append(requestTimes, duration)
 }
 
 func benchmark(url string, n int) {
