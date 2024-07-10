@@ -17,7 +17,7 @@ cd "$(dirname "$0")" || exit
   ls -lh cloudy-pics.tar
   #scp -o ConnectTimeout=3 backend.tar learnerlab:.
   #scp -o ConnectTimeout=3 frontend.tar learnerlab:.
-  scp -i ~/.ssh/cloudy-pics-keys.pem -o ConnectTimeout=3 cloudy-pics.tar learnerlab:.
+  scp -i ~/.ssh/labuser.pem -o ConnectTimeout=3 cloudy-pics.tar learnerlab:.
   #rm backend.tar
   #rm frontend.tar
   rm cloudy-pics.tar
@@ -25,17 +25,17 @@ cd "$(dirname "$0")" || exit
 
 # Build Docker image
 # ssh learnerlab "rm -rf cloudy-pics && tar xzf backend.tar && tar xzf frontend.tar && rm backend.tar && rm frontend.tar"
-ssh -i ~/.ssh/cloudy-pics-keys.pem learnerlab "rm -rf cloudy-pics && tar xzf cloudy-pics.tar && rm cloudy-pics.tar"
-ssh -i ~/.ssh/cloudy-pics-keys.pem learnerlab "cd cloudy-pics && sudo docker build -f Dockerfile.backend -t backend:latest ."
-ssh -i ~/.ssh/cloudy-pics-keys.pem learnerlab "cd cloudy-pics && sudo docker build --build-arg API_IP=54.159.143.31 -f Dockerfile.frontend -t frontend:latest ."
+ssh -i ~/.ssh/labuser.pem learnerlab "rm -rf cloudy-pics && tar xzf cloudy-pics.tar && rm cloudy-pics.tar"
+ssh -i ~/.ssh/labuser.pem learnerlab "cd cloudy-pics && sudo docker build -f Dockerfile.backend -t backend:latest ."
+ssh -i ~/.ssh/labuser.pem learnerlab "cd cloudy-pics && sudo docker build --build-arg API_IP=18.232.58.105 -f Dockerfile.frontend -t frontend:latest ."
 
 # Stop remote container if running
-ssh -i ~/.ssh/cloudy-pics-keys.pem learnerlab "sudo docker ps -q -a --filter name=backend | xargs sudo docker rm -f" || true
-ssh -i ~/.ssh/cloudy-pics-keys.pem learnerlab "sudo docker ps -q -a --filter name=frontend | xargs sudo docker rm -f" || true
+ssh -i ~/.ssh/labuser.pem learnerlab "sudo docker ps -q -a --filter name=backend | xargs sudo docker rm -f" || true
+ssh -i ~/.ssh/labuser.pem learnerlab "sudo docker ps -q -a --filter name=frontend | xargs sudo docker rm -f" || true
 
 # Start container in daemon mode
-ssh -i ~/.ssh/cloudy-pics-keys.pem learnerlab "sudo docker run -d --name frontend -p 80:80 frontend:latest"
-ssh -i ~/.ssh/cloudy-pics-keys.pem learnerlab "sudo docker run -d --name backend -v /home/ec2-user/.aws:/root/.aws -p 3000:3000 -p 4000:4000 backend:latest"
+ssh -i ~/.ssh/labuser.pem learnerlab "sudo docker run -d --name frontend -p 80:80 frontend:latest"
+ssh -i ~/.ssh/labuser.pem learnerlab "sudo docker run -d --name backend -v /home/ec2-user/.aws:/root/.aws -p 3000:3000 -p 4000:4000 backend:latest"
 
 # Test the connection
 VM_IP="$(grep learnerlab ~/.ssh/config -A10 | grep HostName | awk '{print $2}')"

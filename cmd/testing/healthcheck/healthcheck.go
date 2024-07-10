@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"cloudy-pics.uniroma1.it/cloudy-pics/cmd/healthcheck/utils"
+	"cloudy-pics.uniroma1.it/cloudy-pics/cmd/testing/utils"
 	"fmt"
 	"math"
 	"os"

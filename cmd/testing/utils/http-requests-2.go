@@ -1,5 +1,5 @@
 package utils
-
+/*
 import (
 	"bytes"
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const defaultEndpoint = "http://cloudy-pics-asg-lb-1051926860.us-east-1.elb.amazonaws.com:3000"
+const defaultEndpoint = "http://cloudy-pics-asg-lb-1351867487.us-east-1.elb.amazonaws.com:3000"
 
 const defaultTimeout = 1 * time.Second
 
@@ -45,19 +45,6 @@ func timeHTTPRequest(url string, withBody bool) (string, int, error) {
 
 	// Calculate the time taken for the request in milliseconds
 	duration := time.Since(start).Milliseconds()
-
-	// Get the response body as a string, if needed
-	var body string
-	if withBody {
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return "", 0, err
-		}
-		body = string(bodyBytes)
-	} else {
-		// Discard the response body, if not needed
-		body = ""
-	}
 
 	// Print the success, as a green dot
 	fmt.Fprintf(os.Stderr, "\033[32m.\033[0m")
@@ -168,3 +155,4 @@ func TimeHTTPRequestWaiting(url string, wg *sync.WaitGroup) (int, error) {
 	defer wg.Done()
 	return TimeHTTPRequest(url)
 }
+*/
