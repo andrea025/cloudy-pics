@@ -56,7 +56,6 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 	creation := (time.Now()).Format(time.RFC3339)
 	created_datetime := creation[0:10] + " " + creation[11:19] // correct format
 	cid := fmt.Sprintf("%x", md5.Sum([]byte(pid+uid+creation)))
-	// comment = Comment{Id: cid, Photo: pid, User: uid, Text: ct.Text, CreatedDatetime: creation_datetime}
 
 	dbComment, er := rt.db.CommentPhoto(cid, pid, uid, ct.Text, created_datetime)
 	if errors.Is(er, database_nosql.ErrBanned) {

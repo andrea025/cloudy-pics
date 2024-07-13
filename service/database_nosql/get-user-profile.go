@@ -86,12 +86,6 @@ func (db *appdbimpl) GetUserProfile(id string, req_id string) (User, error) {
     if err != nil {
         return user, fmt.Errorf("failed to scan Photo table: %w", err)
     }
-
-    /*
-    if scanResult == nil || len(scanResult.Items) == 0 {
-        return user, fmt.Errorf("the photos of the user are 0")
-    }
-    */
     
     for _, item := range scanResult.Items {
         var photo Photo

@@ -36,6 +36,7 @@ import (
 
 	"github.com/ardanlabs/conf"
 	"github.com/sirupsen/logrus"
+	"github.com/joho/godotenv"
 	"cloudy-pics.uniroma1.it/cloudy-pics/service/api"
 	"cloudy-pics.uniroma1.it/cloudy-pics/service/database_nosql"
 	"cloudy-pics.uniroma1.it/cloudy-pics/service/storage"
@@ -86,9 +87,14 @@ func run() error {
 		logger.SetLevel(logrus.InfoLevel)
 	}
 
-	logger.Infof("application initializing")
+	err = godotenv.Load(".env")
+	if err != nil {
+	    logger.WithError(err).Error("failed to load the .env file")
+		return fmt.Errorf("failed to load the .env file: %w", err)
+	}
 
-	
+	logger.Infof("application initialization")
+
 	// Create a custom AWS configuration assuming the IAM LabRole
 	// Load the default configuration, from ~/.aws/config (access region)
     conf, err := config.LoadDefaultConfig(context.TODO())
@@ -101,7 +107,8 @@ func run() error {
     stsClient := sts.NewFromConfig(conf)
 
     // Assume the IAM role
-    roleArn := "arn:aws:iam::318666490558:role/LabRole"
+    // roleArn := "arn:aws:iam::905418406304:role/EC2_Role"
+    roleArn := os.Getenv("ARN_ROLE")
     creds := stscreds.NewAssumeRoleProvider(stsClient, roleArn)
 
     // Create a new AWS configuration using the temporary credentials

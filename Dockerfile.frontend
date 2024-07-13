@@ -3,7 +3,7 @@ FROM node:lts as builder
 # Define a build argument
 ARG API_IP
 
-# Set an environment variable in the builder stage if needed
+# Set an environment variable in the builder stage
 ENV API_IP=$API_IP
 
 ### Copy Vue.js code

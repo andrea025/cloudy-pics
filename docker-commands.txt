@@ -1,7 +1,0 @@
-cd Desktop/wasa-photo/
-
-sudo docker build -t wasa-photo-backend:latest -f Dockerfile.backend .
-sudo docker run [-d] -p 3000:3000 -p 4000:4000 wasa-photo-backend
-
-sudo docker build -t wasa-photo-frontend:latest -f Dockerfile.frontend . 
-sudo docker run -p 80:80 wasa-photo-frontend

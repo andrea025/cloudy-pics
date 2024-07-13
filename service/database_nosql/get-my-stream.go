@@ -109,12 +109,6 @@ func (db *appdbimpl) GetMyStream(id string) ([]Photo, error) {
 				return nil, err
 			}
 			stream = append(stream, photo)
-
-			/*
-				if len(stream) >= 50 {
-					return stream, nil
-				}
-			*/
 		}
 	}
 

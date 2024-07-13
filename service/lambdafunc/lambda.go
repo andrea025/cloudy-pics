@@ -6,7 +6,7 @@ import (
     "context"
 )
 
-// AppStorage is the high level interface for the AWS Rekognition service
+// AppLambda is the high level interface for interacting with AWS lambda 
 type AppLambda interface {
     InvokeRekognition(bucket, key string) error
     InvokeCompression(bucket, key string) error
@@ -29,7 +29,7 @@ func New(lambdafun *lambda.Client) (AppLambda, error) {
 
 // Check whether the AWS lambda is available or not (in that case, an error will be returned)
 func (lambdafun *applambdaimpl) CheckConnectivity() error {
-    // We can try to list bucket as a simple way to check connectivity.
+    // We can try to list lambda functions as a simple way to check connectivity.
     _, err := lambdafun.c.ListFunctions(context.TODO(), &lambda.ListFunctionsInput{})
     return err
 }

@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: WASAPhoto
+  title: CloudyPics
   description: |-
-    Keep in touch with your friends by sharing photos of special moments, thanks to WASAPhoto! 
+    Keep in touch with your friends by sharing photos of special moments, thanks to CloudyPics! 
     Directly from your PC, you can upload your photos, and they will be visible to everyone who is following you.
   version: "1"
   contact:

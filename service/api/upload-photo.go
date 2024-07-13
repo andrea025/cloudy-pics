@@ -126,7 +126,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	// Invoke the Lambda function image-rekognition
-	err = rt.lambda.InvokeRekognition("cloudypicsbucket", filename)
+	err = rt.lambda.InvokeRekognition("cloudypics", filename)
 	if err != nil {
 	  	ctx.Logger.WithError(err).Error("Failed to invoke rekognition lambda function")
 	  	w.WriteHeader(http.StatusInternalServerError)
@@ -147,7 +147,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	// Invoke the Lambda function compression lambda
-	err = rt.lambda.InvokeCompression("cloudypicsbucket", filename)
+	err = rt.lambda.InvokeCompression("cloudypics", filename)
 	if err != nil {
 	  	ctx.Logger.WithError(err).Error("Failed to invoke compression lambda function")
 	  	w.WriteHeader(http.StatusInternalServerError)

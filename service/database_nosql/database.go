@@ -54,19 +54,6 @@ type appdbimpl struct {
     c *dynamodb.Client
 }
 
-/*
-// getItem returns an item if found based on the key provided.
-// the key could be either a primary or composite key and values map.
-func GetItem(c *dynamodb.Client, tableName string, key DynoNotation) (item DynoNotation, err error) {
-    resp, err := c.GetItem(context.TODO(), &dynamodb.GetItemInput{Key: key, TableName: aws.String(tableName)})
-    if err != nil {
-        return nil, err
-    }
-
-    return resp.Item, nil
-}
-*/
-
 func New(db *dynamodb.Client) (AppDatabase, error) {
 	if db == nil {
 		return nil, errors.New("dynamodb client is required when building an AppDatabase")

@@ -13,7 +13,7 @@ import (
 )
 
 const defaultEndpoint = "http://cloudy-pics-asg-lb-258440012.us-east-1.elb.amazonaws.com:3000"
-const defaultTimeout = 2 * time.Second
+const defaultTimeout = 3 * time.Second
 
 func timeHTTPRequest(url string, withBody bool, bearer string, method string, body string) (string, int, error) {
 	// Add the default endpoint if the URL is relative

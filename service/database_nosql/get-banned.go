@@ -78,14 +78,6 @@ func (db *appdbimpl) GetBanned(id string, req_id string) ([]UserShortInfo, error
 		return nil, fmt.Errorf("failed to batch get users: %w", err)
 	}
 
-	/*
-	items := []map[string]types.AttributeValue{}
-	err = attributevalue.UnmarshalListOfMaps(batchGetResult.Responses["User"], &items)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal users: %w", err)
-	}
-	*/
-
 	// Print the items
 	for _, item := range batchGetResult.Responses["User"] {
 		var user UserShortInfo

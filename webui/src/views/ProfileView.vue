@@ -280,7 +280,7 @@ export default {
             <router-link class="edit-btn" to="/profile/username" v-if="this.reqId == this.id">
               Edit Username
             </router-link>
-            <button class="clear-btn" @click="onPickFile">
+            <button class="clear-btn" @click="onPickFile" v-if="this.reqId == this.id">
               <NewPostIcon />
             </button>
             <input type="file" style="display: none" ref="fileInput" accept=".jpg,.jpeg" @change="onFilePicked" />

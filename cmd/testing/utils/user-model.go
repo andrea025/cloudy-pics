@@ -301,7 +301,7 @@ func (u *UserModel) uploadPhoto() State {
 	// List all files in ./test-assets
 	assetsPhotos, err := os.ReadDir("./pictures")
 	if err != nil {
-		panic(err) // Totally fine to panic here, as this is a developer error
+		panic(err)
 	}
 
 	// Pick a random photo
@@ -375,12 +375,6 @@ func (u *UserModel) Run() {
 		u.durationsMutex.Unlock()
 
 		if nextState != Start && lastRequestTime > -1 {
-			// Wait 1 second before transitioning to the next state,
-			// to simulate a user thinking about what to do next,
-			// except when going back to the start state.
-			//
-			// Also, do not wait if the last request failed,
-			// since we need to stress test the system.
 			time.Sleep(2 * time.Second)
 		}
 		u.currentState = nextState
@@ -399,8 +393,6 @@ func (u *UserModel) collectHTTPRequestWithBody(url string, bearer string, method
 }
 
 func (u *UserModel) collectHTTPRequest(url string, bearer string, method string, body string) error {
-	// Do not reuse collectHTTPRequestWithBody, as we don't need the body,
-	// and we do not even want to read it from the response stream connection.
 	duration, err := TimeHTTPRequest(url, bearer, method, body)
 	if err != nil {
 		u.collectDuration(-1)
